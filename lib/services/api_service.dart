@@ -9,12 +9,20 @@ class ApiService {
   static const String _gamesEndpoint = '/games';
   static const String _gameDetailsEndpoint = '/games/{id}';
 
+  final _cache = <String, dynamic>{};
+
   /// Fetch Games con Paginación, Búsqueda y Filtros
   Future<List<Game>> fetchGames({
     String searchQuery = '',
     String ordering = '',
     int page = 1,
   }) async {
+    final cacheKey = 'games_$searchQuery_$ordering';
+    
+    if (_cache.containsKey(cacheKey)) {
+      return _cache[cacheKey];
+    }
+
     // Construir la URL con parámetros de búsqueda, orden y paginación
     String apiUrl = '$_baseUrl$_gamesEndpoint?key=$_apiKey&page=$page&page_size=25';
     if (searchQuery.isNotEmpty) {
@@ -29,7 +37,9 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final List<dynamic> results = data['results'] as List;
-      return results.map((json) => Game.fromJson(json)).toList();
+      final List<Game> games = results.map((json) => Game.fromJson(json)).toList();
+      _cache[cacheKey] = games;
+      return games;
     } else {
       throw Exception('Error al cargar juegos: ${response.statusCode}');
     }

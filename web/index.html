@@ -31,8 +31,60 @@
 
 	<title>trakr_def</title>
 	<link rel="manifest" href="manifest.json">
+
+	<!-- Agregar preload para el main.dart.js -->
+	<link rel="preload" as="script" href="main.dart.js">
+	
+	<!-- Agregar preconnect para Firebase y otras APIs -->
+	<link rel="preconnect" href="https://www.gstatic.com">
+	<link rel="preconnect" href="https://api.rawg.io">
+	<link rel="preconnect" href="https://firestore.googleapis.com">
+	
+	<!-- Agregar loading spinner -->
+	<style>
+		.loading {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			margin: 0;
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			-ms-transform: translate(-50%, -50%);
+			transform: translate(-50%, -50%);
+		}
+		
+		.loading-spinner {
+			width: 50px;
+			height: 50px;
+			border: 3px solid #f3f3f3;
+			border-top: 3px solid #3B82F6;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+		}
+		
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+	</style>
 </head>
 <body>
+	<!-- Agregar loading spinner -->
+	<div id="loading" class="loading">
+		<div class="loading-spinner"></div>
+	</div>
+
+	<script>
+		// Remover loading spinner cuando la app esté lista
+		window.addEventListener('load', function() {
+			var loading = document.getElementById('loading');
+			if(loading) {
+				loading.remove();
+			}
+		});
+	</script>
+
 	<script src="flutter_bootstrap.js" async></script>
 	<script type="module">
 		import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.3/firebase-app.js";

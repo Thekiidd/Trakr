@@ -41,27 +41,29 @@ class GameCard extends StatelessWidget {
                   flex: 3,
                   child: ClipRRect(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                    child: CachedNetworkImage(
-                      imageUrl: game.imageUrl ?? '',
+                    child: Image.network(
+                      game.imageUrl!,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => Container(
-                        color: AppTheme.cardColor,
-                        child: Center(
+                      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                        if (wasSynchronouslyLoaded) return child;
+                        return AnimatedOpacity(
+                          opacity: frame == null ? 0 : 1,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeOut,
+                          child: child,
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
                           child: CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              AppTheme.accentBlue,
-                            ),
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded / 
+                                  loadingProgress.expectedTotalBytes!
+                                : null,
                           ),
-                        ),
-                      ),
-                      errorWidget: (context, url, error) => Container(
-                        color: AppTheme.cardColor,
-                        child: Icon(
-                          Icons.gamepad,
-                          color: AppTheme.secondaryLight.withOpacity(0.5),
-                          size: 40,
-                        ),
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),

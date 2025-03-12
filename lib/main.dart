@@ -15,17 +15,25 @@ import 'views/auth/signup_screen.dart';
 import 'views/landing/landing_page.dart';
 import 'core/services/cache_service.dart';
 import 'services/games_service.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  
-  // Configuración para web
+
   if (kIsWeb) {
-    await html.window.navigator.serviceWorker?.register('flutter_service_worker.js');
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    
+    // Configurar Firebase Performance
+    await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
   }
+
+  // Precarga de datos críticos
+  await Future.wait([
+    precacheImage(AssetImage('assets/images/logo.png'), context),
+    // Otras precarga necesarias
+  ]);
 
   runApp(
     MultiProvider(
