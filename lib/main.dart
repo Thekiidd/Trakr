@@ -4,11 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:html' if (dart.library.html) 'dart:html' as html; // Para web
-
 import 'package:trakr_def/views/games/games_screen.dart';
 import 'package:trakr_def/views/landing/game_details.dart' show GameDetailsScreen;
 import 'package:trakr_def/views/profile/profile_screen.dart';
-
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'viewmodels/auth_viewmodel.dart';
@@ -23,9 +21,6 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
-  // Inicializar servicios
-  await CacheService().init();
   
   // Configuración para web
   if (kIsWeb) {

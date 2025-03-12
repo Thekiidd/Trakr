@@ -8,6 +8,12 @@ class CacheService {
 
   final _cacheManager = DefaultCacheManager();
 
+  // Añadimos el método init que faltaba
+  Future<void> init() async {
+    // Inicialización básica del cache
+    await _cacheManager.emptyCache(); // Limpia el cache al iniciar
+  }
+
   // Cache para imágenes
   Future<String> getCachedImage(String url) async {
     final fileInfo = await _cacheManager.getFileFromCache(url);
