@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "983795207283",
+    "project_id": "trakr-def",
+    "storage_bucket": "trakr-def.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:983795207283:android:39fab263e4c23a57b62e06",
+        "android_client_info": {
+          "package_name": "com.example.trakr_def"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFkTr64wmo7DQxDRK7lPnG5Qe12mO9r5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
