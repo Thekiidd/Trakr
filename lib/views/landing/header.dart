@@ -15,187 +15,53 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
     final isMobile = screenWidth < 800;
 
     return AppBar(
-      backgroundColor: Colors.transparent, // Fondo transparente
-      elevation: 0, // Sin sombra para un look limpio
-      flexibleSpace: Container(
-        decoration: AppTheme.getGradientDecoration(
-          borderRadius: BorderRadius.zero,
-        ), // Gradiente sutil
-      ),
-      title: GestureDetector(
-        onTap: () => context.go('/'),
-        child: Text(
-          'TRAKR',
-          style: GoogleFonts.inter(
-            color: AppTheme.secondaryLight,
-            fontSize: isMobile ? 24.0 : 32.0,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5, // Espaciado para mayúsculas
-          ),
-        ),
-      ),
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      title: Text('TRAKR'),
       actions: [
+        // Botones de navegación
+                  if (!isMobile) ...[
+          TextButton(
+            onPressed: () => context.go('/'),
+            child: Text('INICIO', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => context.go('/games'),
+            child: Text('JUEGOS', style: TextStyle(color: Colors.white)),
+          ),
+          TextButton(
+            onPressed: () => context.go('/forum'),
+            child: Text('FORO', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+        // Menú móvil
+        if (isMobile)
+                    PopupMenuButton<String>(
+            icon: Icon(Icons.menu, color: Colors.white),
+            onSelected: (value) => context.go(value),
+            itemBuilder: (context) => [
+              PopupMenuItem(value: '/', child: Text('INICIO')),
+              PopupMenuItem(value: '/games', child: Text('JUEGOS')),
+              PopupMenuItem(value: '/forum', child: Text('FORO')),
+            ],
+          ),
+        // Botón de perfil/login
         Consumer<AuthViewModel>(
-          builder: (context, authViewModel, child) {
+          builder: (context, authViewModel, _) {
             final user = authViewModel.currentUser;
-            if (user == null) {
-              return Row(
-                children: [
-                  if (!isMobile) ...[
-                    _buildNavButton(context, title: 'INICIO', route: '/'),
-                    SizedBox(width: screenWidth * 0.02),
-                    _buildNavButton(context, title: 'JUEGOS', route: '/games'),
-                    SizedBox(width: screenWidth * 0.02),
-                    _buildNavButton(context, title: 'FORO', route: '/forum'),
-                    SizedBox(width: screenWidth * 0.02),
-                  ] else ...[
-                    // Menú para móvil cuando no hay sesión iniciada
-                    PopupMenuButton<String>(
-                      icon: Icon(Icons.menu, color: AppTheme.secondaryLight),
-                      onSelected: (value) => context.go(value),
-                      itemBuilder: (BuildContext context) => [
-                        PopupMenuItem(
-                          value: '/',
-                          child: Text('INICIO'),
-                        ),
-                        PopupMenuItem(
-                          value: '/games',
-                          child: Text('JUEGOS'),
-                        ),
-                        PopupMenuItem(
-                          value: '/forum',
-                          child: Text('FORO'),
-                        ),
-                        PopupMenuItem(
-                          value: '/login',
-                          child: Text('INICIAR SESIÓN'),
-                        ),
-                      ],
-                    ),
-                  ],
-                  if (!isMobile)
-                    Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isMobile ? 0 : screenWidth * 0.01,
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () => context.go('/login'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.secondaryLight,
-                          foregroundColor: AppTheme.textDark,
-                          padding: EdgeInsets.symmetric(
-                            horizontal: isMobile ? 10 : 20,
-                            vertical: 10,
-                          ),
-                        ),
-                        child: Text(
-                          'INICIAR SESIÓN',
-                          style: GoogleFonts.inter(
-                            fontSize: isMobile ? 14 : 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            } else {
-              return Row(
-                children: [
-                  if (!isMobile) ...[
-                    _buildNavButton(context, title: 'INICIO', route: '/'),
-                    SizedBox(width: screenWidth * 0.02),
-                    _buildNavButton(context, title: 'JUEGOS', route: '/games'),
-                    SizedBox(width: screenWidth * 0.02),
-                    _buildNavButton(context, title: 'FORO', route: '/forum'),
-                    SizedBox(width: screenWidth * 0.02),
-                  ] else ...[
-                    // Menú para móvil cuando hay sesión iniciada
-                    PopupMenuButton<String>(
-                      icon: Icon(Icons.menu, color: AppTheme.secondaryLight),
-                      onSelected: (value) {
-                        if (value == 'logout') {
-                          // Implementar logout
-                          authViewModel.signOut();
-                        } else {
-                          context.go(value);
-                        }
-                      },
-                      itemBuilder: (BuildContext context) => [
-                        PopupMenuItem(
-                          value: '/',
-                          child: Text('INICIO'),
-                        ),
-                        PopupMenuItem(
-                          value: '/games',
-                          child: Text('JUEGOS'),
-                        ),
-                        PopupMenuItem(
-                          value: '/forum',
-                          child: Text('FORO'),
-                        ),
-                        PopupMenuItem(
-                          value: '/profile',
-                          child: Text('PERFIL'),
-                        ),
-                        PopupMenuItem(
-                          value: 'logout',
-                          child: Text('CERRAR SESIÓN'),
-                        ),
-                      ],
-                    ),
-                  ],
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 8 : screenWidth * 0.01,
-                    ),
-                    child: GestureDetector(
-                      onTap: () => context.go('/profile'),
-                      child: CircleAvatar(
-                        radius: isMobile ? 16 : 20,
-                        backgroundColor: AppTheme.secondaryLight,
-                        child: user.photoURL != null
-                            ? ClipOval(
-                                child: Image.network(
-                                  user.photoURL!,
-                                  width: isMobile ? 32 : 40,
-                                  height: isMobile ? 32 : 40,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : Icon(
-                                Icons.person,
-                                color: AppTheme.textDark,
-                                size: isMobile ? 20 : 24,
-                              ),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            }
+            return user != null
+                ? IconButton(
+                    icon: Icon(Icons.person),
+                    onPressed: () => context.go('/profile'),
+                  )
+                : TextButton(
+                    onPressed: () => context.go('/login'),
+                    child: Text('INICIAR SESIÓN', 
+                      style: TextStyle(color: Colors.white)),
+                  );
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildNavButton(BuildContext context, {required String title, required String route}) {
-    return TextButton(
-      onPressed: () => context.go(route),
-      style: TextButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 16),
-        foregroundColor: AppTheme.secondaryLight.withAlpha(25),
-      ),
-      child: Text(
-        title,
-        style: GoogleFonts.inter(
-          color: AppTheme.secondaryLight,
-          fontSize: 18,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 1.5,
-        ),
-      ),
     );
   }
 

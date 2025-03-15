@@ -5,6 +5,7 @@ import '../../core/theme/app_theme.dart';
 import '../../viewmodels/auth_viewmodel.dart';
 import '../../models/usuario_modelo.dart';
 import '../../servicios/servicio_usuario.dart';
+import 'package:go_router/go_router.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -63,75 +64,61 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      body: FutureBuilder<UsuarioModelo?>(
-        future: _usuarioFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
+      appBar: AppBar(
+        title: Text('Mi Perfil'),
+      ),
+      body: Consumer<AuthViewModel>(
+        builder: (context, authViewModel, _) {
+          final user = authViewModel.currentUser;
+          
+          if (user == null) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Error al cargar el perfil',
-                    style: TextStyle(color: AppTheme.secondaryLight),
+                    'No has iniciado sesión',
+                    style: TextStyle(color: Colors.white),
                   ),
-                  SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _cargarDatosUsuario();
-                      });
-                    },
-                    child: Text('Reintentar'),
+                    onPressed: () => context.go('/login'),
+                    child: Text('Iniciar Sesión'),
                   ),
                 ],
               ),
             );
           }
 
-          final usuario = snapshot.data;
-          if (usuario == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'No se encontró el perfil',
-                    style: TextStyle(color: AppTheme.secondaryLight),
-                  ),
-                  SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _cargarDatosUsuario();
-                      });
-                    },
-                    child: Text('Crear perfil'),
-                  ),
-                ],
-              ),
-            );
-          }
-
-          return NestedScrollView(
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                _construirAppBar(usuario),
-                _construirPerfilHeader(usuario),
-                _construirTabBar(),
-              ];
-            },
-            body: TabBarView(
-              controller: _tabController,
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _construirTabInformacion(usuario),
-                _construirTabJuegos(usuario),
-                _construirTabLogros(usuario),
-                _construirTabListas(usuario),
+                CircleAvatar(
+                  radius: 50,
+                  backgroundImage: user.photoURL != null 
+                    ? NetworkImage(user.photoURL!) 
+                    : null,
+                  child: user.photoURL == null 
+                    ? Icon(Icons.person, size: 50) 
+                    : null,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  user.displayName ?? user.email ?? 'Usuario',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 8),
+                Text(
+                  user.email ?? '',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 16,
+                  ),
+                ),
               ],
             ),
           );

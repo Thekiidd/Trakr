@@ -47,22 +47,13 @@ class _ForumScreenState extends State<ForumScreen> {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
       appBar: AppBar(
-        title: Text('COMUNIDAD TRAKR'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _showCreatePostDialog(),
-          ),
-        ],
+        title: Text('Foro de la Comunidad'),
       ),
-      body: ListView.builder(
-        itemCount: _posts.length + 1,
-        itemBuilder: (context, index) {
-          if (index == _posts.length) {
-            return _buildLoadMoreButton();
-          }
-          return _PostCard(post: _posts[index]);
-        },
+      body: Center(
+        child: Text(
+          'Foro en construcción',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
