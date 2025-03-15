@@ -17,7 +17,7 @@ class ApiService {
     String ordering = '',
     int page = 1,
   }) async {
-    final cacheKey = 'games_$searchQuery_$ordering';
+    final cacheKey = 'games_$searchQuery$ordering';
     
     if (_cache.containsKey(cacheKey)) {
       return _cache[cacheKey];

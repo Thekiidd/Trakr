@@ -15,7 +15,6 @@ import 'views/auth/signup_screen.dart';
 import 'views/landing/landing_page.dart';
 import 'core/services/cache_service.dart';
 import 'services/games_service.dart';
-import 'package:firebase_performance/firebase_performance.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,16 +23,7 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
-    
-    // Configurar Firebase Performance
-    await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
   }
-
-  // Precarga de datos críticos
-  await Future.wait([
-    precacheImage(AssetImage('assets/images/logo.png'), context),
-    // Otras precarga necesarias
-  ]);
 
   runApp(
     MultiProvider(
@@ -48,7 +38,18 @@ void main() async {
 }
 
 class TrackGameApp extends StatelessWidget {
-  TrackGameApp({super.key});
+  TrackGameApp({super.key}) {
+    _precacheAssets();
+  }
+
+  void _precacheAssets() async {
+    // Las imágenes se precargarán cuando el contexto esté disponible
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      precacheImage(const AssetImage('assets/images/logo.png'), navigatorKey.currentContext!);
+    });
+  }
+
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   final GoRouter _router = GoRouter(
     initialLocation: '/',
