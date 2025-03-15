@@ -1637,13 +1637,16 @@ file:///C:/Users/Taller/Desktop/trakr_def1/lib/firebase_options.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/main.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/models/game.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/models/game_model.dart
+file:///C:/Users/Taller/Desktop/trakr_def1/lib/models/post_model.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/models/usuario_modelo.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/services/api_service.dart
+file:///C:/Users/Taller/Desktop/trakr_def1/lib/services/forum_service.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/services/games_service.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/servicios/servicio_usuario.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/viewmodels/auth_viewmodel.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/views/auth/login_screen.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/views/auth/signup_screen.dart
+file:///C:/Users/Taller/Desktop/trakr_def1/lib/views/forum/forum_screen.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/views/games/games_screen.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/views/landing/features_section.dart
 file:///C:/Users/Taller/Desktop/trakr_def1/lib/views/landing/footer_section.dart
