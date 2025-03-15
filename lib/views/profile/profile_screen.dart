@@ -39,13 +39,29 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     if (authViewModel.currentUser != null) {
       _usuarioFuture = _servicioUsuario
           .obtenerPerfilUsuario(authViewModel.currentUser!.uid)
-          .then((datos) => datos != null ? UsuarioModelo.fromMap(datos) : null);
+          .then((datos) async {
+        // Si no existe el perfil, lo creamos
+        if (datos == null) {
+          await _servicioUsuario.guardarPerfilUsuario(
+            uid: authViewModel.currentUser!.uid,
+            email: authViewModel.currentUser!.email ?? '',
+            nombreUsuario: authViewModel.currentUser!.displayName ?? 
+                          authViewModel.currentUser!.email?.split('@')[0] ?? 'Usuario',
+            fotoUrl: authViewModel.currentUser!.photoURL,
+            fechaRegistro: DateTime.now(),
+          );
+          // Volvemos a obtener los datos
+          return _servicioUsuario.obtenerPerfilUsuario(authViewModel.currentUser!.uid)
+              .then((newData) => UsuarioModelo.fromMap(newData!));
+        }
+        return UsuarioModelo.fromMap(datos);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-        return Scaffold(
+    return Scaffold(
       backgroundColor: AppTheme.primaryDark,
       body: FutureBuilder<UsuarioModelo?>(
         future: _usuarioFuture,
@@ -54,11 +70,50 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             return Center(child: CircularProgressIndicator());
           }
 
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Error al cargar el perfil',
+                    style: TextStyle(color: AppTheme.secondaryLight),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _cargarDatosUsuario();
+                      });
+                    },
+                    child: Text('Reintentar'),
+                  ),
+                ],
+              ),
+            );
+          }
+
           final usuario = snapshot.data;
           if (usuario == null) {
             return Center(
-              child: Text('Error al cargar el perfil',
-                  style: TextStyle(color: AppTheme.secondaryLight)),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'No se encontró el perfil',
+                    style: TextStyle(color: AppTheme.secondaryLight),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        _cargarDatosUsuario();
+                      });
+                    },
+                    child: Text('Crear perfil'),
+                  ),
+                ],
+              ),
             );
           }
 

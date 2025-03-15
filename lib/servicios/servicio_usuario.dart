@@ -12,7 +12,7 @@ class ServicioUsuario {
     String? nombreUsuario,
     String? fotoUrl,
     String? biografia,
-    DateTime? fechaRegistro,
+    required DateTime fechaRegistro,
   }) async {
     try {
       await _db.collection('usuarios').doc(uid).set({
@@ -21,15 +21,18 @@ class ServicioUsuario {
         'nombreUsuario': nombreUsuario ?? email.split('@')[0],
         'fotoUrl': fotoUrl,
         'biografia': biografia ?? '',
-        'fechaRegistro': fechaRegistro ?? DateTime.now(),
+        'fechaRegistro': fechaRegistro,
         'juegosCompletados': 0,
         'totalHorasJugadas': 0,
         'logrosDesbloqueados': 0,
         'seguidores': [],
         'siguiendo': [],
         'ultimaConexion': DateTime.now(),
+        'nivelUsuario': 'Novato',
+        'juegosRecientes': [],
       }, SetOptions(merge: true));
     } catch (e) {
+      print('Error al guardar el perfil: $e');
       throw Exception('Error al guardar el perfil: $e');
     }
   }
@@ -38,8 +41,12 @@ class ServicioUsuario {
   Future<Map<String, dynamic>?> obtenerPerfilUsuario(String uid) async {
     try {
       DocumentSnapshot doc = await _db.collection('usuarios').doc(uid).get();
-      return doc.exists ? doc.data() as Map<String, dynamic> : null;
+      if (!doc.exists) {
+        return null;
+      }
+      return doc.data() as Map<String, dynamic>;
     } catch (e) {
+      print('Error al obtener el perfil: $e');
       throw Exception('Error al obtener el perfil: $e');
     }
   }
