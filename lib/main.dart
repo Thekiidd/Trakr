@@ -15,6 +15,7 @@ import 'views/auth/signup_screen.dart';
 import 'views/landing/landing_page.dart';
 import 'core/services/cache_service.dart';
 import 'services/games_service.dart';
+import 'views/forum/forum_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -83,6 +84,10 @@ class TrackGameApp extends StatelessWidget {
       GoRoute(
         path: '/profile',
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/forum',
+        builder: (context, state) => const ForumScreen(),
       ),
     ],
     redirect: (context, state) {

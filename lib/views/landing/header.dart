@@ -48,6 +48,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     SizedBox(width: screenWidth * 0.02),
                     _buildNavButton(context, title: 'JUEGOS', route: '/games'),
                     SizedBox(width: screenWidth * 0.02),
+                    _buildNavButton(context, title: 'COMUNIDAD', route: '/forum'),
+                    SizedBox(width: screenWidth * 0.02),
                   ],
                   Padding(
                     padding: EdgeInsets.symmetric(
@@ -87,6 +89,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     _buildNavButton(context, title: 'INICIO', route: '/'),
                     SizedBox(width: screenWidth * 0.02),
                     _buildNavButton(context, title: 'JUEGOS', route: '/games'),
+                    SizedBox(width: screenWidth * 0.02),
+                    _buildNavButton(context, title: 'COMUNIDAD', route: '/forum'),
                     SizedBox(width: screenWidth * 0.02),
                   ],
                   Padding(
@@ -128,13 +132,10 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildNavButton(BuildContext context, {required String title, required String route}) {
     return TextButton(
-      onPressed: () {
-        print('Navegando a: $route'); // Depuración
-        context.go(route);
-      },
+      onPressed: () => context.go(route),
       style: TextButton.styleFrom(
         padding: EdgeInsets.symmetric(horizontal: 16),
-        foregroundColor: AppTheme.secondaryLight.withAlpha(25), // Efecto hover blanco
+        foregroundColor: AppTheme.secondaryLight.withAlpha(25),
       ),
       child: Text(
         title,
@@ -142,7 +143,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
           color: AppTheme.secondaryLight,
           fontSize: 18,
           fontWeight: FontWeight.w500,
-          letterSpacing: 1.5, // Espaciado para mayúsculas
+          letterSpacing: 1.5,
         ),
       ),
     );
