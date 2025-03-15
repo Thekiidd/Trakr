@@ -23,9 +23,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
         ), // Gradiente sutil
       ),
       title: GestureDetector(
-        onTap: () {
-          context.go('/');
-        },
+        onTap: () => context.go('/'),
         child: Text(
           'TRAKR',
           style: GoogleFonts.inter(
@@ -50,36 +48,55 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     SizedBox(width: screenWidth * 0.02),
                     _buildNavButton(context, title: 'FORO', route: '/forum'),
                     SizedBox(width: screenWidth * 0.02),
+                  ] else ...[
+                    // Menú para móvil cuando no hay sesión iniciada
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.menu, color: AppTheme.secondaryLight),
+                      onSelected: (value) => context.go(value),
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem(
+                          value: '/',
+                          child: Text('INICIO'),
+                        ),
+                        PopupMenuItem(
+                          value: '/games',
+                          child: Text('JUEGOS'),
+                        ),
+                        PopupMenuItem(
+                          value: '/forum',
+                          child: Text('FORO'),
+                        ),
+                        PopupMenuItem(
+                          value: '/login',
+                          child: Text('INICIAR SESIÓN'),
+                        ),
+                      ],
+                    ),
                   ],
-                  Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 0 : screenWidth * 0.01,
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        context.go('/login');
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.secondaryLight, // Fondo blanco
-                        foregroundColor: AppTheme.textDark, // Texto negro
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isMobile ? 10 : 20,
-                          vertical: 10,
-                        ),
+                  if (!isMobile)
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: isMobile ? 0 : screenWidth * 0.01,
                       ),
-                      child: Text(
-                        'INICIAR CUENTA',
-                        style: GoogleFonts.inter(
-                          color: AppTheme.textDark,
-                          fontSize: isMobile ? 14 : 16,
-                          fontWeight: FontWeight.bold,
+                      child: ElevatedButton(
+                        onPressed: () => context.go('/login'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppTheme.secondaryLight,
+                          foregroundColor: AppTheme.textDark,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: isMobile ? 10 : 20,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: Text(
+                          'INICIAR SESIÓN',
+                          style: GoogleFonts.inter(
+                            fontSize: isMobile ? 14 : 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               );
             } else {
@@ -92,18 +109,51 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     SizedBox(width: screenWidth * 0.02),
                     _buildNavButton(context, title: 'FORO', route: '/forum'),
                     SizedBox(width: screenWidth * 0.02),
+                  ] else ...[
+                    // Menú para móvil cuando hay sesión iniciada
+                    PopupMenuButton<String>(
+                      icon: Icon(Icons.menu, color: AppTheme.secondaryLight),
+                      onSelected: (value) {
+                        if (value == 'logout') {
+                          // Implementar logout
+                          authViewModel.signOut();
+                        } else {
+                          context.go(value);
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => [
+                        PopupMenuItem(
+                          value: '/',
+                          child: Text('INICIO'),
+                        ),
+                        PopupMenuItem(
+                          value: '/games',
+                          child: Text('JUEGOS'),
+                        ),
+                        PopupMenuItem(
+                          value: '/forum',
+                          child: Text('FORO'),
+                        ),
+                        PopupMenuItem(
+                          value: '/profile',
+                          child: Text('PERFIL'),
+                        ),
+                        PopupMenuItem(
+                          value: 'logout',
+                          child: Text('CERRAR SESIÓN'),
+                        ),
+                      ],
+                    ),
                   ],
                   Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: isMobile ? 0 : screenWidth * 0.01,
+                      horizontal: isMobile ? 8 : screenWidth * 0.01,
                     ),
                     child: GestureDetector(
-                      onTap: () {
-                        context.go('/profile');
-                      },
+                      onTap: () => context.go('/profile'),
                       child: CircleAvatar(
                         radius: isMobile ? 16 : 20,
-                        backgroundColor: AppTheme.secondaryLight, // Fondo blanco
+                        backgroundColor: AppTheme.secondaryLight,
                         child: user.photoURL != null
                             ? ClipOval(
                                 child: Image.network(
@@ -115,7 +165,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                               )
                             : Icon(
                                 Icons.person,
-                                color: AppTheme.textDark, // Ícono negro
+                                color: AppTheme.textDark,
                                 size: isMobile ? 20 : 24,
                               ),
                       ),
