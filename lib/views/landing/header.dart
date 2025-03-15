@@ -48,7 +48,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     SizedBox(width: screenWidth * 0.02),
                     _buildNavButton(context, title: 'JUEGOS', route: '/games'),
                     SizedBox(width: screenWidth * 0.02),
-                    _buildNavButton(context, title: 'COMUNIDAD', route: '/forum'),
+                    _buildNavButton(context, title: 'FORO', route: '/forum'),
                     SizedBox(width: screenWidth * 0.02),
                   ],
                   Padding(
@@ -90,7 +90,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                     SizedBox(width: screenWidth * 0.02),
                     _buildNavButton(context, title: 'JUEGOS', route: '/games'),
                     SizedBox(width: screenWidth * 0.02),
-                    _buildNavButton(context, title: 'COMUNIDAD', route: '/forum'),
+                    _buildNavButton(context, title: 'FORO', route: '/forum'),
                     SizedBox(width: screenWidth * 0.02),
                   ],
                   Padding(
