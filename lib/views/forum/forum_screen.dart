@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_theme.dart';
 import '../../models/post_model.dart';
 import '../../services/forum_service.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class ForumScreen extends StatefulWidget {
   const ForumScreen({super.key});
@@ -47,9 +48,7 @@ class _ForumScreenState extends State<ForumScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      appBar: AppBar(
-        title: Text('Foro de la Comunidad'),
-      ),
+      appBar: const CustomAppBar(title: 'Foro'),
       body: Center(
         child: Text(
           'Foro en construcción',

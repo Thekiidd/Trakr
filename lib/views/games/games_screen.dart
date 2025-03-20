@@ -7,6 +7,7 @@ import '../../models/game.dart';
 import '../../services/api_service.dart';
 import '../../core/theme/app_theme.dart';
 import '../../viewmodels/auth_viewmodel.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -80,30 +81,14 @@ class _GamesScreenState extends State<GamesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      appBar: AppBar(
-        backgroundColor: AppTheme.primaryDark,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => context.go('/'),
-        ),
-        title: Text(
-          'TRAKR GAMES',
-          style: GoogleFonts.orbitron(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+      appBar: CustomAppBar(
+        title: 'Games',
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
             onPressed: () {
               // Lógica de búsqueda
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () => _handleLogout(context),
-            tooltip: 'Cerrar Sesión',
           ),
           const SizedBox(width: 8),
         ],

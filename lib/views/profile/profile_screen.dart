@@ -6,6 +6,7 @@ import '../../viewmodels/auth_viewmodel.dart';
 import '../../models/usuario_modelo.dart';
 import '../../servicios/servicio_usuario.dart';
 import 'package:go_router/go_router.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -64,8 +65,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      appBar: AppBar(
-        title: Text('Mi Perfil'),
+      appBar: CustomAppBar(
+        title: 'Mi Perfil',
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _handleLogout(context),
+            tooltip: 'Cerrar Sesión',
+          ),
+          const SizedBox(width: 8),
+        ],
       ),
       body: Consumer<AuthViewModel>(
         builder: (context, authViewModel, _) {
@@ -133,6 +142,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         child: Icon(Icons.add, color: AppTheme.secondaryLight),
       ),
     );
+  }
+
+  Future<void> _handleLogout(BuildContext context) async {
+    // ... mismo código de _handleLogout que en LandingPage ...
   }
 
   Widget _construirAppBar(UsuarioModelo usuario) {
