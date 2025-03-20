@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../servicios/servicio_usuario.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthViewModel extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -10,6 +11,11 @@ class AuthViewModel extends ChangeNotifier {
   User? _currentUser;
 
   AuthViewModel() {
+    _init();
+  }
+
+  void _init() {
+    _currentUser = _auth.currentUser;
     _auth.authStateChanges().listen((user) {
       _currentUser = user;
       notifyListeners();

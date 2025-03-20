@@ -9,8 +9,8 @@ import 'testimonials_section.dart';
 import 'footer_section.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trakr_def/view_models/auth_view_model.dart';
-import 'package:trakr_def/widgets/custom_app_bar.dart';
+import '../../viewmodels/auth_viewmodel.dart';
+import '../../widgets/custom_app_bar.dart';
 
 class LandingPage extends StatelessWidget {
   const LandingPage({super.key});

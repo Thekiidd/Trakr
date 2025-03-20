@@ -82,4 +82,4 @@ class ForumPost {
       metadatos: metadatos ?? this.metadatos,
     );
   }
-} 
+}

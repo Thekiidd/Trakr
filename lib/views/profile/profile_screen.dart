@@ -16,17 +16,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
-  final ServicioUsuario _servicioUsuario = ServicioUsuario();
-  late TabController _tabController;
-  late Future<UsuarioModelo?> _usuarioFuture;
   bool _isEditing = false;
-  final _biografiaController = TextEditingController();
+  late TabController _tabController;
+  final TextEditingController _biografiaController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
-    _cargarDatosUsuario();
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -34,31 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _tabController.dispose();
     _biografiaController.dispose();
     super.dispose();
-  }
-
-  void _cargarDatosUsuario() {
-    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
-    if (authViewModel.currentUser != null) {
-      _usuarioFuture = _servicioUsuario
-          .obtenerPerfilUsuario(authViewModel.currentUser!.uid)
-          .then((datos) async {
-        // Si no existe el perfil, lo creamos
-        if (datos == null) {
-          await _servicioUsuario.guardarPerfilUsuario(
-            uid: authViewModel.currentUser!.uid,
-            email: authViewModel.currentUser!.email ?? '',
-            nombreUsuario: authViewModel.currentUser!.displayName ?? 
-                          authViewModel.currentUser!.email?.split('@')[0] ?? 'Usuario',
-            fotoUrl: authViewModel.currentUser!.photoURL,
-            fechaRegistro: DateTime.now(),
-          );
-          // Volvemos a obtener los datos
-          return _servicioUsuario.obtenerPerfilUsuario(authViewModel.currentUser!.uid)
-              .then((newData) => UsuarioModelo.fromMap(newData!));
-        }
-        return UsuarioModelo.fromMap(datos);
-      });
-    }
   }
 
   @override
@@ -73,79 +45,80 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             onPressed: () => _handleLogout(context),
             tooltip: 'Cerrar Sesión',
           ),
+          IconButton(
+            icon: Icon(
+              _isEditing ? Icons.check : Icons.edit,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                _isEditing = !_isEditing;
+              });
+            },
+          ),
           const SizedBox(width: 8),
         ],
       ),
-      body: Consumer<AuthViewModel>(
-        builder: (context, authViewModel, _) {
-          final user = authViewModel.currentUser;
-          
-          if (user == null) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+      body: Column(
                 children: [
-                  Text(
-                    'No has iniciado sesión',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => context.go('/login'),
-                    child: Text('Iniciar Sesión'),
+          // ... resto del contenido del perfil ...
+          TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(text: 'Mis Juegos'),
+              Tab(text: 'Reseñas'),
+              Tab(text: 'Actividad'),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: const [
+                // ... contenido de las pestañas ...
+              ],
+            ),
                   ),
                 ],
               ),
             );
           }
 
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CircleAvatar(
-                  radius: 50,
-                  backgroundImage: user.photoURL != null 
-                    ? NetworkImage(user.photoURL!) 
-                    : null,
-                  child: user.photoURL == null 
-                    ? Icon(Icons.person, size: 50) 
-                    : null,
-                ),
-                SizedBox(height: 16),
-                Text(
-                  user.displayName ?? user.email ?? 'Usuario',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 8),
-                Text(
-                  user.email ?? '',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 16,
-                  ),
+  Future<void> _handleLogout(BuildContext context) async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.primaryDark,
+        title: const Text(
+          'Cerrar Sesión',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          '¿Estás seguro que deseas cerrar sesión?',
+          style: TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Cerrar Sesión'),
                 ),
               ],
             ),
           );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: Implementar creación de nueva lista
-          _mostrarDialogoNuevaLista();
-        },
-        backgroundColor: AppTheme.accentBlue,
-        child: Icon(Icons.add, color: AppTheme.secondaryLight),
-      ),
-    );
-  }
 
-  Future<void> _handleLogout(BuildContext context) async {
-    // ... mismo código de _handleLogout que en LandingPage ...
+    if (shouldLogout == true) {
+      final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+      await authViewModel.signOut();
+      if (mounted) {
+        context.go('/');
+      }
+    }
   }
 
   Widget _construirAppBar(UsuarioModelo usuario) {

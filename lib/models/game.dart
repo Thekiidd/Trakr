@@ -55,4 +55,4 @@ class Game {
       'releaseDate': Timestamp.fromDate(releaseDate),
     };
   }
-} 
+}
