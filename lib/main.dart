@@ -4,9 +4,10 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
 import 'dart:html' if (dart.library.html) 'dart:html' as html; // Para web
-import 'package:trakr_def/views/games/games_screen.dart';
-import 'package:trakr_def/views/landing/game_details.dart' show GameDetailsScreen;
-import 'package:trakr_def/views/profile/profile_screen.dart';
+import 'widgets/status_message.dart';
+import 'views/games/games_screen.dart';
+import 'views/landing/game_details.dart' show GameDetailsScreen;
+import 'views/profile/profile_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'viewmodels/auth_viewmodel.dart';
@@ -20,10 +21,14 @@ import 'views/forum/forum_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+  try {
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
+  } catch (error) {
+    debugPrint('Error inicializando Firebase: $error');
   }
 
   runApp(
@@ -44,15 +49,22 @@ class TrackGameApp extends StatelessWidget {
   }
 
   void _precacheAssets() async {
-    // Las imágenes se precargarán cuando el contexto esté disponible
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      precacheImage(const AssetImage('assets/images/logo.png'), navigatorKey.currentContext!);
+      try {
+        precacheImage(
+          const AssetImage('assets/images/logo.png'),
+          navigatorKey.currentContext!,
+        );
+      } catch (error) {
+        debugPrint('Error precargando imágenes: $error');
+      }
     });
   }
 
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   final GoRouter _router = GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: '/',
     routes: [
       // Ruta raíz: LandingPage para todos los usuarios
@@ -77,7 +89,14 @@ class TrackGameApp extends StatelessWidget {
       GoRoute(
         path: '/game-details/:gameId',
         builder: (context, state) {
-          final gameId = int.parse(state.pathParameters['gameId']!);
+          final gameId = int.tryParse(state.pathParameters['gameId'] ?? '');
+          if (gameId == null) {
+            return const Scaffold(
+              body: Center(
+                child: Text('ID de juego inválido'),
+              ),
+            );
+          }
           return GameDetailsScreen(gameId: gameId);
         },
       ),
@@ -97,12 +116,12 @@ class TrackGameApp extends StatelessWidget {
       final isRoot = state.matchedLocation == '/';
 
       if (!isAuthenticated && !isAuthRoute && !isRoot) {
-        return '/'; // Redirigir a raíz si no está autenticado y no está en login/signup
+        return '/login';
       }
       if (isAuthenticated && isAuthRoute) {
-        return '/games'; // Redirigir a Games tras login/signup si está autenticado
+        return '/games';
       }
-      return null; // No redirigir si está en '/' o en rutas permitidas
+      return null;
     },
     errorBuilder: (context, state) => Scaffold(
       body: Center(
@@ -118,6 +137,12 @@ class TrackGameApp extends StatelessWidget {
       title: 'Trakr',
       theme: AppTheme.darkTheme,
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: child!,
+        );
+      },
     );
   }
 }

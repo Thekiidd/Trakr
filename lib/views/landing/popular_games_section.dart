@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../../core/theme/app_theme.dart';
-import '../../models/game_model.dart';
+import '../../models/game.dart';
 import '../../services/api_service.dart';
 
 class PopularGamesSection extends StatelessWidget {

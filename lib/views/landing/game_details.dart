@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:trakr_def/core/theme/app_theme.dart';
-import 'package:trakr_def/models/game_model.dart';
+import '../../models/game.dart';
 import 'package:trakr_def/services/api_service.dart';
 
 class GameDetailsScreen extends StatefulWidget {
@@ -20,7 +20,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _gameFuture = ApiService().fetchGameDetails(widget.gameId);
+    _gameFuture = ApiService().fetchGameById(widget.gameId);
   }
 
   @override

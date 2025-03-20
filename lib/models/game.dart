@@ -21,13 +21,13 @@ class Game {
 
   factory Game.fromJson(Map<String, dynamic> json) {
     return Game(
-      id: json['id'] as String,
+      id: json['id'].toString(),
       name: json['name'] as String,
-      imageUrl: json['imageUrl'] as String?,
+      imageUrl: json['background_image'] as String?,
       description: json['description'] as String?,
       rating: json['rating']?.toDouble(),
-      genres: List<String>.from(json['genres'] ?? []),
-      releaseDate: (json['releaseDate'] as Timestamp).toDate(),
+      genres: List<String>.from(json['genres']?.map((g) => g['name']) ?? []),
+      releaseDate: DateTime.parse(json['released'] ?? ''),
     );
   }
 
