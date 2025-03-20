@@ -40,12 +40,18 @@ class _GamesScreenState extends State<GamesScreen> {
   Future<void> _handleLogout(BuildContext context) async {
     final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
     
-    // Mostrar diálogo de confirmación
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cerrar Sesión'),
-        content: const Text('¿Estás seguro que deseas cerrar sesión?'),
+        backgroundColor: AppTheme.primaryDark,
+        title: const Text(
+          'Cerrar Sesión',
+          style: TextStyle(color: Colors.white),
+        ),
+        content: const Text(
+          '¿Estás seguro que deseas cerrar sesión?',
+          style: TextStyle(color: Colors.white70),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -65,7 +71,7 @@ class _GamesScreenState extends State<GamesScreen> {
     if (shouldLogout == true) {
       await authViewModel.signOut();
       if (mounted) {
-        context.go('/'); // Redirigir al landing page
+        context.go('/');
       }
     }
   }
@@ -75,6 +81,11 @@ class _GamesScreenState extends State<GamesScreen> {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
       appBar: AppBar(
+        backgroundColor: AppTheme.primaryDark,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/'),
+        ),
         title: Text(
           'TRAKR GAMES',
           style: GoogleFonts.orbitron(
@@ -83,12 +94,18 @@ class _GamesScreenState extends State<GamesScreen> {
           ),
         ),
         actions: [
-          // Botón de cerrar sesión
+          IconButton(
+            icon: const Icon(Icons.search, color: Colors.white),
+            onPressed: () {
+              // Lógica de búsqueda
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () => _handleLogout(context),
             tooltip: 'Cerrar Sesión',
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Padding(
