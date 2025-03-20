@@ -54,8 +54,14 @@ class AuthViewModel extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await _auth.signOut();
-    notifyListeners();
+    try {
+      await FirebaseAuth.instance.signOut();
+      _currentUser = null;
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error al cerrar sesión: $e');
+      rethrow;
+    }
   }
 
   Future<void> addFavorite(String gameId, String gameName) async {

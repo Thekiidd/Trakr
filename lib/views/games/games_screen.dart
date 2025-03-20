@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../models/game.dart';
 import '../../services/api_service.dart';
 import '../../core/theme/app_theme.dart';
+import '../../viewmodels/auth_viewmodel.dart';
 
 class GamesScreen extends StatefulWidget {
   const GamesScreen({super.key});
@@ -36,6 +37,39 @@ class _GamesScreenState extends State<GamesScreen> {
     });
   }
 
+  Future<void> _handleLogout(BuildContext context) async {
+    final authViewModel = Provider.of<AuthViewModel>(context, listen: false);
+    
+    // Mostrar diálogo de confirmación
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cerrar Sesión'),
+        content: const Text('¿Estás seguro que deseas cerrar sesión?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.red,
+            ),
+            child: const Text('Cerrar Sesión'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout == true) {
+      await authViewModel.signOut();
+      if (mounted) {
+        context.go('/'); // Redirigir al landing page
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,6 +82,14 @@ class _GamesScreenState extends State<GamesScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        actions: [
+          // Botón de cerrar sesión
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _handleLogout(context),
+            tooltip: 'Cerrar Sesión',
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
