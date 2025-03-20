@@ -7,12 +7,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
   final List<Widget>? actions;
+  final String? backRoute;
 
   const CustomAppBar({
     Key? key,
     required this.title,
     this.showBackButton = true,
     this.actions,
+    this.backRoute,
   }) : super(key: key);
 
   @override
@@ -21,10 +23,16 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       backgroundColor: AppTheme.primaryDark,
       leading: showBackButton ? IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
-        onPressed: () => context.pop(),
+        onPressed: () {
+          if (backRoute != null) {
+            context.go(backRoute!);
+          } else {
+            context.pop();
+          }
+        },
       ) : null,
       title: Text(
-        title,
+        title.toUpperCase(),
         style: GoogleFonts.orbitron(
           color: Colors.white,
           fontWeight: FontWeight.bold,

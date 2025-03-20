@@ -39,6 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       backgroundColor: AppTheme.primaryDark,
       appBar: CustomAppBar(
         title: 'Mi Perfil',
+        backRoute: '/',
         actions: [
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white),

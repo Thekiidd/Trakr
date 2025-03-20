@@ -31,12 +31,16 @@ class LandingPage extends StatelessWidget {
               icon: const Icon(Icons.account_circle, color: Colors.white),
               offset: const Offset(0, 56),
               color: AppTheme.primaryDark,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+                side: const BorderSide(color: Colors.white24),
+              ),
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   value: 'profile',
-                  child: ListTile(
-                    leading: const Icon(Icons.person, color: Colors.white),
-                    title: const Text(
+                  child: const ListTile(
+                    leading: Icon(Icons.person, color: Colors.white),
+                    title: Text(
                       'Mi Perfil',
                       style: TextStyle(color: Colors.white),
                     ),
@@ -45,22 +49,22 @@ class LandingPage extends StatelessWidget {
                 const PopupMenuDivider(),
                 PopupMenuItem<String>(
                   value: 'logout',
-                  child: ListTile(
-                    leading: const Icon(Icons.logout, color: Colors.red),
-                    title: const Text(
+                  child: const ListTile(
+                    leading: Icon(Icons.logout, color: Colors.red),
+                    title: Text(
                       'Cerrar Sesión',
                       style: TextStyle(color: Colors.red),
                     ),
                   ),
                 ),
               ],
-              onSelected: (String value) {
+              onSelected: (String value) async {
                 switch (value) {
                   case 'profile':
                     context.push('/profile');
                     break;
                   case 'logout':
-                    _handleLogout(context);
+                    await _handleLogout(context);
                     break;
                 }
               },

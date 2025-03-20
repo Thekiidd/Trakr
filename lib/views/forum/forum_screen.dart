@@ -48,7 +48,10 @@ class _ForumScreenState extends State<ForumScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      appBar: const CustomAppBar(title: 'Foro'),
+      appBar: const CustomAppBar(
+        title: 'Foro',
+        backRoute: '/',
+      ),
       body: Center(
         child: Text(
           'Foro en construcción',
