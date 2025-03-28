@@ -67,9 +67,9 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                game.imageUrl != null
+                game.coverImage != null
                     ? Image.network(
-                        game.imageUrl!,
+                        game.coverImage!,
                         fit: BoxFit.cover,
                         width: double.infinity,
                         height: isMobile ? 150 : 200,
@@ -88,7 +88,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
                       ),
                 SizedBox(height: isMobile ? 8 : 16),
                 Text(
-                  game.name,
+                  game.title,
                   style: GoogleFonts.inter(
                     color: AppTheme.secondaryLight,
                     fontSize: isMobile ? 20 : 24,

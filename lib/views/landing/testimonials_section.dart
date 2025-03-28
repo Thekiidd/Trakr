@@ -2,58 +2,91 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/theme/app_theme.dart';
+import '../../models/forum_post.dart';
+import '../../services/forum_service.dart';
 
 class TestimonialsSection extends StatelessWidget {
   const TestimonialsSection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final isMobile = screenWidth < 600;
-
     return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: screenWidth * 0.1,
-        vertical: screenHeight * 0.1,
-        ),      
-        child: Column(
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+      child: Column(
         children: [
+          // Título de la sección
           Text(
-            'TESTIMONIOS',
+            'Lo que dicen nuestros usuarios',
             style: GoogleFonts.inter(
-              fontSize: isMobile ? 14 : 16,
+              fontSize: 28,
               fontWeight: FontWeight.bold,
-              color: AppTheme.accentBlue,
-              letterSpacing: 4,
+              color: AppTheme.secondaryLight,
             ),
           ),
-          SizedBox(height: screenHeight * 0.05),
-          
-          Wrap(
-            spacing: 30,
-            runSpacing: 30,
-            alignment: WrapAlignment.center,
-            children: [
-              _TestimonialCard(
-                name: 'Alex García',
-                role: 'Gamer Profesional',
-                text: 'Trakr ha revolucionado la forma en que organizo mis juegos. ¡Increíble herramienta!',
-                imageUrl: 'assets/images/testimonial1.jpg',
-              ),
-              _TestimonialCard(
-                name: 'María Rodríguez',
-                role: 'Streamer',
-                text: 'La mejor app para mantener un registro de mis logros y compartirlos con mi comunidad.',
-                imageUrl: 'assets/images/testimonial2.jpg',
-              ),
-              _TestimonialCard(
-                name: 'Carlos Ruiz',
-                role: 'Gamer Casual',
-                text: 'Simple, intuitiva y con una comunidad increíble. ¡No puedo pedir más!',
-                imageUrl: 'assets/images/testimonial3.jpg',
-              ),
-            ],
+          const SizedBox(height: 8),
+          // Subtítulo
+          Text(
+            'Descubre cómo TRAKR está ayudando a los jugadores',
+            style: GoogleFonts.inter(
+              fontSize: 16,
+              color: AppTheme.secondaryLight.withOpacity(0.8),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 32),
+          // Lista de testimonios
+          FutureBuilder<List<ForumPost>>(
+            future: ForumService().getPosts(limit: 3),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(
+                    color: AppTheme.accentBlue,
+                  ),
+                );
+              }
+
+              if (snapshot.hasError) {
+                return Center(
+                  child: Text(
+                    'Error al cargar los testimonios',
+                    style: GoogleFonts.inter(
+                      color: AppTheme.secondaryLight.withOpacity(0.8),
+                    ),
+                  ),
+                );
+              }
+
+              final posts = snapshot.data ?? [];
+              if (posts.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No hay testimonios destacados en este momento',
+                    style: GoogleFonts.inter(
+                      color: AppTheme.secondaryLight.withOpacity(0.8),
+                    ),
+                  ),
+                );
+              }
+
+              return SizedBox(
+                height: 320,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: posts.length,
+                  itemBuilder: (context, index) {
+                    final post = posts[index];
+                    return _TestimonialCard(
+                      name: post.authorName,
+                      role: 'Gamer Entusiasta',
+                      avatarUrl: post.authorPhotoUrl ?? 'https://picsum.photos/100/100',
+                      content: post.content,
+                      rating: post.likeCount > 0 ? 5 : 4,
+                    );
+                  },
+                ),
+              );
+            },
           ),
         ],
       ),
@@ -64,66 +97,111 @@ class TestimonialsSection extends StatelessWidget {
 class _TestimonialCard extends StatelessWidget {
   final String name;
   final String role;
-  final String text;
-  final String imageUrl;
+  final String avatarUrl;
+  final String content;
+  final int rating;
 
   const _TestimonialCard({
     required this.name,
     required this.role,
-    required this.text,
-    required this.imageUrl,
+    required this.avatarUrl,
+    required this.content,
+    required this.rating,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 300,
-      padding: EdgeInsets.all(24),
+      margin: const EdgeInsets.only(right: 16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            AppTheme.accentBlue.withOpacity(0.1),
-            Colors.transparent,
-          ],
-        ),
+        color: AppTheme.secondaryDark,
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: AppTheme.accentBlue.withOpacity(0.2),
+          width: 1,
         ),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 40,
-            backgroundImage: AssetImage(imageUrl),
-          ),
-          SizedBox(height: 16),
-          Text(
-            name,
-            style: GoogleFonts.inter(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          // Calificación
+          Row(
+            children: List.generate(
+              rating,
+              (index) => Icon(
+                Icons.star,
+                color: Colors.amber,
+                size: 16,
+              ),
             ),
           ),
+          const SizedBox(height: 16),
+          // Contenido del testimonio
           Text(
-            role,
+            content,
             style: GoogleFonts.inter(
               fontSize: 14,
-              color: AppTheme.accentBlue,
-            ),
-          ),
-          SizedBox(height: 16),
-          Text(
-            text,
-            style: GoogleFonts.inter(
-              fontSize: 16,
-              color: Colors.white.withOpacity(0.7),
+              color: AppTheme.secondaryLight.withOpacity(0.8),
               height: 1.5,
             ),
-            textAlign: TextAlign.center,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const Spacer(),
+          // Información del usuario
+          Row(
+            children: [
+              // Avatar
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: AppTheme.accentBlue.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: ClipOval(
+                  child: Image.network(
+                    avatarUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Center(
+                        child: Text(
+                          name[0].toUpperCase(),
+                          style: GoogleFonts.inter(
+                            color: AppTheme.accentBlue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Nombre y rol
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    style: GoogleFonts.inter(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.secondaryLight,
+                    ),
+                  ),
+                  Text(
+                    role,
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      color: AppTheme.secondaryLight.withOpacity(0.6),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),

@@ -18,7 +18,7 @@ class GamesService {
     final snapshot = await _firestore
         .collection('games')
         .orderBy('name')
-        .startAfter([lastGame.name])
+        .startAfter([lastGame.title])
         .limit(20)
         .get();
 

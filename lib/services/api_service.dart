@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/game.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ApiService {
   static const String _apiKey = '5b5bb7f4a9a54cbb82b82d4f338a8694';
@@ -28,7 +29,21 @@ class ApiService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final results = data['results'] as List;
-      final List<Game> games = results.map((json) => Game.fromJson(json)).toList();
+      final List<Game> games = results.map((json) {
+        return Game(
+          id: json['id'].toString(),
+          title: json['name'] ?? '',
+          description: json['description'] ?? '',
+          coverImage: json['background_image'] ?? '',
+          genre: json['genres']?.isNotEmpty == true ? json['genres'][0]['name'] : '',
+          platform: json['platforms']?.isNotEmpty == true ? json['platforms'][0]['platform']['name'] : '',
+          releaseDate: DateTime.parse(json['released'] ?? DateTime.now().toIso8601String()),
+          rating: (json['rating'] ?? 0.0).toDouble(),
+          totalRatings: json['ratings_count'] ?? 0,
+          tags: (json['tags'] as List?)?.map((tag) => tag['name'].toString()).toList() ?? [],
+          metadata: json,
+        );
+      }).toList();
       _cache[cacheKey] = games;
       return games;
     } else {
@@ -43,7 +58,19 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return Game.fromJson(data);
+      return Game(
+        id: data['id'].toString(),
+        title: data['name'] ?? '',
+        description: data['description'] ?? '',
+        coverImage: data['background_image'] ?? '',
+        genre: data['genres']?.isNotEmpty == true ? data['genres'][0]['name'] : '',
+        platform: data['platforms']?.isNotEmpty == true ? data['platforms'][0]['platform']['name'] : '',
+        releaseDate: DateTime.parse(data['released'] ?? DateTime.now().toIso8601String()),
+        rating: (data['rating'] ?? 0.0).toDouble(),
+        totalRatings: data['ratings_count'] ?? 0,
+        tags: (data['tags'] as List?)?.map((tag) => tag['name'].toString()).toList() ?? [],
+        metadata: data,
+      );
     } else {
       throw Exception('Failed to load game details');
     }
@@ -60,7 +87,19 @@ class ApiService {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return Game.fromJson(data);
+      return Game(
+        id: data['id'].toString(),
+        title: data['name'] ?? '',
+        description: data['description'] ?? '',
+        coverImage: data['background_image'] ?? '',
+        genre: data['genres']?.isNotEmpty == true ? data['genres'][0]['name'] : '',
+        platform: data['platforms']?.isNotEmpty == true ? data['platforms'][0]['platform']['name'] : '',
+        releaseDate: DateTime.parse(data['released'] ?? DateTime.now().toIso8601String()),
+        rating: (data['rating'] ?? 0.0).toDouble(),
+        totalRatings: data['ratings_count'] ?? 0,
+        tags: (data['tags'] as List?)?.map((tag) => tag['name'].toString()).toList() ?? [],
+        metadata: data,
+      );
     } else {
       throw Exception('Error al cargar el juego');
     }

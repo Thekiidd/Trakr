@@ -83,6 +83,7 @@ class _GamesScreenState extends State<GamesScreen> {
       backgroundColor: AppTheme.primaryDark,
       appBar: CustomAppBar(
         title: 'Games',
+        backRoute: '/',
         actions: [
           IconButton(
             icon: const Icon(Icons.search, color: Colors.white),
@@ -141,9 +142,9 @@ class _GamesScreenState extends State<GamesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
-                          child: game.imageUrl != null
+                          child: game.coverImage != null
                               ? Image.network(
-                                  game.imageUrl!,
+                                  game.coverImage!,
                                   fit: BoxFit.cover,
                                   width: double.infinity,
                                 )
@@ -158,7 +159,7 @@ class _GamesScreenState extends State<GamesScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                game.name,
+                                game.title,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),

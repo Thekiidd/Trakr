@@ -82,7 +82,7 @@ class TrackGameApp extends StatelessWidget {
         builder: (context, state) => SignupScreen(),
       ),
       // Rutas protegidas (requieren autenticación)
-      GoRoute(
+      GoRoute(      
         path: '/games',
         builder: (context, state) => const GamesScreen(),
       ),

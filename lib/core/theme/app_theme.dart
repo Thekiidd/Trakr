@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   static const Color primaryDark = Color(0xFF121212); // Negro principal (fondo oscuro)
   static const Color secondaryLight = Colors.white; // Blanco secundario (texto principal)
+  static const Color secondaryDark = Color(0xFF1E1E1E); // Negro secundario (fondo de tarjetas)
   static const Color textDark = Colors.black; // Negro para texto en elementos claros
   static const Color accentBlue = Color(0xFF3B82F6); // Azul para gradientes (no botones)
   static const Color accentGreen = Color(0xFF10B981); // Verde para hints o detalles
