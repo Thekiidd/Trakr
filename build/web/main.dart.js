@@ -97912,7 +97912,7 @@ B.b.P(r,A.b([B.Al,A.bQ(A.b([B.Ih,B.dy,A.W(B.c.ah(p.w,1),q,q,q,q,q,q,q)],s),B.q,B
 return A.qy(A.ji(!1,q,!0,A.b3(A.b([o,new A.bb(B.eU,A.b3(r,B.K,B.m,B.p),q)],s),B.K,B.m,B.p),q,!0,q,q,q,q,q,q,q,q,q,new A.awZ(a,p),q,q,q,q),B.bd,q,q,q,q)},
 $S:229}
 A.awZ.prototype={
-$0(){return A.c5(this.a).M3("/game/"+this.b.a,null,t.X)},
+$0(){return A.c5(this.a).M3("/game-details/"+this.b.a,null,t.X)},
 $S:0}
 A.P1.prototype={
 L(a){var s,r,q,p,o,n=null,m=t.w,l=A.b2(a,n,m).w.a.a<768

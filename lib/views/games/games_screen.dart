@@ -137,7 +137,7 @@ class _GamesScreenState extends State<GamesScreen> {
                 return Card(
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
-                    onTap: () => context.push('/game/${game.id}'),
+                    onTap: () => context.push('/game-details/${game.id}'),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
