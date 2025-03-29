@@ -72,7 +72,7 @@ class HeroSection extends StatelessWidget {
                   children: [
                     // Botón principal
                     ElevatedButton(
-                      onPressed: () => context.go('/register'),
+                      onPressed: () => context.go('/signup'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.accentBlue,
                         foregroundColor: AppTheme.secondaryLight,
@@ -217,7 +217,7 @@ class HeroSection extends StatelessWidget {
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () => context.go('/register'),
+                        onPressed: () => context.go('/signup'),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppTheme.accentBlue,
                           foregroundColor: AppTheme.secondaryLight,

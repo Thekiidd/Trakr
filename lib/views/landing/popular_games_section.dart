@@ -113,7 +113,7 @@ class PopularGamesSection extends StatelessWidget {
                       coverUrl: game.coverImage ?? 'https://picsum.photos/300/400',
                       rating: game.rating ?? 0.0,
                       genre: game.genre ?? 'Sin género',
-                      onTap: () => context.go('/games/${game.id}'),
+                      onTap: () => context.go('/game-details/${game.id}'),
                     );
                   },
                 ),

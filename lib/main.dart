@@ -11,6 +11,7 @@ import 'views/profile/profile_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
 import 'viewmodels/auth_viewmodel.dart';
+import 'viewmodels/user_viewmodel.dart';
 import 'views/auth/login_screen.dart';
 import 'views/auth/signup_screen.dart';
 import 'views/landing/landing_page.dart';
@@ -37,6 +38,7 @@ void main() async {
         Provider<CacheService>(create: (_) => CacheService()),
         Provider<GamesService>(create: (_) => GamesService()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
+        ChangeNotifierProvider(create: (_) => UserViewModel()),
       ],
       child: TrackGameApp(),
     ),

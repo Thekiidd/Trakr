@@ -56,58 +56,71 @@ class _HeaderState extends State<Header> {
             : [],
       ),
       child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Barra principal
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Logo
-                  Row(
-                    children: [
-                      Icon(Icons.gamepad, color: AppTheme.accentBlue, size: 28),
-                      const SizedBox(width: 8),
-                      Text(
-                        'TRAKR',
-                        style: GoogleFonts.montserrat(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.secondaryLight,
-                          letterSpacing: 2,
+        child: Material(
+          color: Colors.transparent,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Barra principal
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Logo - GestureDetector para ir a inicio
+                    GestureDetector(
+                      onTap: () => context.go('/'),
+                      child: Row(
+                        children: [
+                          Icon(Icons.gamepad, color: AppTheme.accentBlue, size: 24),
+                          const SizedBox(width: 8),
+                          Text(
+                            'TRAKR',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.secondaryLight,
+                              letterSpacing: 2,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    
+                    // Navegación escritorio
+                    if (MediaQuery.of(context).size.width > 768)
+                      _buildDesktopNav(context),
+                      
+                    // Menú móvil - Material para efecto táctil
+                    if (MediaQuery.of(context).size.width <= 768)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(30),
+                          onTap: () {
+                            setState(() {
+                              _isMenuOpen = !_isMenuOpen;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Icon(
+                              _isMenuOpen ? Icons.close : Icons.menu,
+                              color: AppTheme.secondaryLight,
+                              size: 24,
+                            ),
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                  
-                  // Navegación escritorio
-                  if (MediaQuery.of(context).size.width > 768)
-                    _buildDesktopNav(context),
-                    
-                  // Menú móvil
-                  if (MediaQuery.of(context).size.width <= 768)
-                    IconButton(
-                      icon: Icon(
-                        _isMenuOpen ? Icons.close : Icons.menu,
-                        color: AppTheme.secondaryLight,
-                        size: 28,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _isMenuOpen = !_isMenuOpen;
-                        });
-                      },
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            
-            // Menú móvil desplegable
-            if (_isMenuOpen && MediaQuery.of(context).size.width <= 768)
-              _buildMobileMenu(context),
-          ],
+              
+              // Menú móvil desplegable
+              if (_isMenuOpen && MediaQuery.of(context).size.width <= 768)
+                _buildMobileMenu(context),
+            ],
+          ),
         ),
       ),
     );
@@ -227,56 +240,70 @@ class _HeaderState extends State<Header> {
       }
     }
     
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: double.infinity,
-      color: AppTheme.primaryDark.withOpacity(0.95),
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Navegación principal
-          _MobileNavItem(
-            icon: Icons.home,
-            title: 'Inicio',
-            onTap: () => _navigateTo('/'),
+    return Material(
+      color: Colors.transparent,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: AppTheme.primaryDark.withOpacity(0.95),
+          border: Border.all(
+            color: AppTheme.accentBlue.withOpacity(0.1),
+            width: 1,
           ),
-          _MobileNavItem(
-            icon: Icons.games,
-            title: 'Juegos',
-            onTap: () => _checkAuthAndNavigate('/games', 'juegos'),
+          borderRadius: const BorderRadius.only(
+            bottomLeft: Radius.circular(16),
+            bottomRight: Radius.circular(16),
           ),
-          _MobileNavItem(
-            icon: Icons.forum,
-            title: 'Foro',
-            onTap: () => _checkAuthAndNavigate('/forum', 'foro'),
-          ),
-          
-          const Divider(color: Colors.white24, height: 32),
-          
-          // Opciones de usuario
-          if (isLoggedIn) ...[
+        ),
+        margin: const EdgeInsets.only(top: 2),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Navegación principal
             _MobileNavItem(
-              icon: Icons.person,
-              title: 'Mi Perfil',
-              onTap: () => _navigateTo('/profile'),
+              icon: Icons.home,
+              title: 'Inicio',
+              onTap: () => _navigateTo('/'),
             ),
             _MobileNavItem(
-              icon: Icons.logout,
-              title: 'Cerrar Sesión',
-              onTap: () {
-                context.read<AuthViewModel>().signOut();
-                _navigateTo('/');
-              },
+              icon: Icons.games,
+              title: 'Juegos',
+              onTap: () => _checkAuthAndNavigate('/games', 'juegos'),
             ),
-          ] else
             _MobileNavItem(
-              icon: Icons.login,
-              title: 'Iniciar Sesión',
-              onTap: () => _navigateTo('/login'),
+              icon: Icons.forum,
+              title: 'Foro',
+              onTap: () => _checkAuthAndNavigate('/forum', 'foro'),
             ),
-        ],
+            
+            const Divider(color: Colors.white24, height: 24),
+            
+            // Opciones de usuario
+            if (isLoggedIn) ...[
+              _MobileNavItem(
+                icon: Icons.person,
+                title: 'Mi Perfil',
+                onTap: () => _navigateTo('/profile'),
+              ),
+              _MobileNavItem(
+                icon: Icons.logout,
+                title: 'Cerrar Sesión',
+                onTap: () {
+                  context.read<AuthViewModel>().signOut();
+                  _navigateTo('/');
+                },
+              ),
+            ] else
+              _MobileNavItem(
+                icon: Icons.login,
+                title: 'Iniciar Sesión',
+                onTap: () => _navigateTo('/signup'),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -355,7 +382,7 @@ class _HeaderState extends State<Header> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              context.go('/register');
+              context.go('/signup');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accentGreen,

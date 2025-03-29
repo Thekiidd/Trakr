@@ -318,6 +318,13 @@ file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web
 file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-2.21.0/lib/src/interop/utils/func.dart
 file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-2.21.0/lib/src/interop/utils/js.dart
 file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_core_web-2.21.0/lib/src/interop/utils/utils.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/firebase_storage.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/src/firebase_storage.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/src/list_result.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/src/reference.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/src/task.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/src/task_snapshot.dart
+file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage-12.4.3/lib/src/utils.dart
 file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage_platform_interface-5.2.3/lib/firebase_storage_platform_interface.dart
 file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage_platform_interface-5.2.3/lib/src/full_metadata.dart
 file:///C:/Users/Taller/AppData/Local/Pub/Cache/hosted/pub.dev/firebase_storage_platform_interface-5.2.3/lib/src/internal/pointer.dart
@@ -1635,6 +1642,7 @@ file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/services/forum_service.dart
 file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/services/games_service.dart
 file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/servicios/servicio_usuario.dart
 file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/viewmodels/auth_viewmodel.dart
+file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/viewmodels/user_viewmodel.dart
 file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/views/auth/login_screen.dart
 file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/views/auth/signup_screen.dart
 file:///C:/Users/Taller/TRAKR_DEFF/Trakr-1/lib/views/forum/forum_screen.dart

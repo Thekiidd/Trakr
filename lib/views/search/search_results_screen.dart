@@ -90,7 +90,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 return GameResultCard(
                   game: game,
                   onTap: () {
-                    context.go('/game-details?id=${game.id}'); // Redirigir a detalles
+                    context.go('/game-details/${game.id}'); // Redirigir a detalles
                   },
                 );
               },
