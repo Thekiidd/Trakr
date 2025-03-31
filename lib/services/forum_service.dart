@@ -1,9 +1,37 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../models/forum_post.dart';
 import '../models/forum_comment.dart';
 
 class ForumService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  // Método para obtener el ID del usuario actual
+  String? getCurrentUserId() {
+    return _auth.currentUser?.uid;
+  }
+  
+  // Método para obtener el nombre del usuario actual
+  Future<String?> getCurrentUsername() async {
+    final user = _auth.currentUser;
+    if (user == null) return null;
+    
+    try {
+      // Intentar obtener el perfil del usuario desde Firestore
+      final doc = await _firestore.collection('usuarios').doc(user.uid).get();
+      if (doc.exists) {
+        final data = doc.data();
+        return data?['nombreUsuario'] ?? user.displayName ?? user.email?.split('@')[0] ?? 'Usuario';
+      }
+      
+      // Si no existe el perfil, usar la información de auth
+      return user.displayName ?? user.email?.split('@')[0] ?? 'Usuario';
+    } catch (e) {
+      print('Error al obtener el nombre de usuario: $e');
+      return user.displayName ?? user.email?.split('@')[0] ?? 'Usuario';
+    }
+  }
 
   // Obtener posts con paginación
   Future<List<ForumPost>> getPosts({

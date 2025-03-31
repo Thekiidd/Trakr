@@ -17,6 +17,8 @@ import 'views/auth/signup_screen.dart';
 import 'views/landing/landing_page.dart';
 import 'core/services/cache_service.dart';
 import 'services/games_service.dart';
+import 'services/forum_service.dart';
+import 'services/api_service.dart';
 import 'views/forum/forum_screen.dart';
 
 void main() async {
@@ -37,6 +39,8 @@ void main() async {
       providers: [
         Provider<CacheService>(create: (_) => CacheService()),
         Provider<GamesService>(create: (_) => GamesService()),
+        Provider<ForumService>(create: (_) => ForumService()),
+        Provider<ApiService>(create: (_) => ApiService()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(create: (_) => UserViewModel()),
       ],

@@ -2,12 +2,15 @@ import 'package:flutter/foundation.dart';
 import '../models/usuario_modelo.dart';
 import '../servicios/servicio_usuario.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserViewModel extends ChangeNotifier {
   UsuarioModelo? _usuario;
   final ServicioUsuario _servicioUsuario = ServicioUsuario();
   bool _isLoading = false;
   String? _errorMessage;
+  FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Getters
   UsuarioModelo? get usuario => _usuario;
@@ -265,84 +268,77 @@ class UserViewModel extends ChangeNotifier {
     }
   }
 
-  // Método para agregar un juego a una lista
-  Future<bool> agregarJuegoALista({
-    required String listaId,
-    required String gameId,
-    required String nombreJuego,
-    String? imagenJuego,
-  }) async {
-    if (_usuario == null) return false;
-
-    _isLoading = true;
-    notifyListeners();
-
+  // Método para añadir un juego a una lista
+  Future<void> agregarJuegoALista(String listId, Map<String, dynamic> gameData) async {
     try {
-      // Buscar la lista
-      final index = _usuario!.listas.indexWhere((lista) => lista.id == listaId);
-      if (index == -1) {
-        _errorMessage = 'Lista no encontrada';
-        _isLoading = false;
-        notifyListeners();
-        return false;
+      if (_usuario == null || _usuario!.uid.isEmpty) {
+        throw Exception('Usuario no autenticado');
       }
-
+      
+      // Obtener referencia a la lista específica
+      final listaRef = _firestore
+          .collection('usuarios')
+          .doc(_usuario!.uid)
+          .collection('listas')
+          .doc(listId);
+          
       // Verificar si el juego ya existe en la lista
-      final listaActual = _usuario!.listas[index];
-      final juegoExiste = listaActual.juegos.any((juego) => juego.gameId == gameId);
-      
-      if (juegoExiste) {
-        _errorMessage = 'El juego ya existe en esta lista';
-        _isLoading = false;
-        notifyListeners();
-        return false;
+      final listaDoc = await listaRef.get();
+      if (!listaDoc.exists) {
+        throw Exception('La lista no existe');
       }
-
-      // Crear nuevo juego para la lista
-      final nuevoJuego = GameInList(
-        gameId: gameId,
-        nombre: nombreJuego,
-        imagenUrl: imagenJuego,
-        fechaAgregado: DateTime.now(),
-      );
-
-      // Agregar juego a la lista
-      final juegosActualizados = List<GameInList>.from(listaActual.juegos)..add(nuevoJuego);
-      final listaActualizada = listaActual.copyWith(
-        juegos: juegosActualizados,
-      );
-
-      // Actualizar listas del usuario
-      final listasActualizadas = List<GameList>.from(_usuario!.listas);
-      listasActualizadas[index] = listaActualizada;
       
-      // Actualizar modelo de usuario
-      final usuarioActualizado = _usuario!.copyWith(
-        listas: listasActualizadas,
-      );
-
-      // Guardar en Firebase
-      await _servicioUsuario.agregarJuegoALista(
-        uid: _usuario!.uid,
-        listaId: listaId,
-        gameId: gameId,
-        nombre: nombreJuego,
-        imagenUrl: imagenJuego,
-      );
-
-      // Actualizar estado local
-      _usuario = usuarioActualizado;
-      _isLoading = false;
-      notifyListeners();
+      final listaData = listaDoc.data() as Map<String, dynamic>;
+      final juegos = listaData['juegos'] as List<dynamic>? ?? [];
       
-      return true;
+      // Verificar si el juego ya está en la lista
+      final existeJuego = juegos.any((juego) => juego['id'] == gameData['id']);
+      if (existeJuego) {
+        throw Exception('El juego ya está en la lista');
+      }
+      
+      // Añadir el juego a la lista
+      await listaRef.update({
+        'juegos': FieldValue.arrayUnion([gameData]),
+        'actualizadoEn': DateTime.now().toIso8601String(),
+      });
+      
+      // Actualizar la información en la memoria
+      final listaIndex = _usuario!.listas.indexWhere((lista) => lista.id == listId);
+      if (listaIndex >= 0) {
+        // Crear un objeto GameInList a partir del Map
+        final nuevoJuego = _crearGameInList(gameData);
+        final juegosActualizados = List<GameInList>.from(_usuario!.listas[listaIndex].juegos)..add(nuevoJuego);
+        
+        final listaActualizada = _usuario!.listas[listaIndex].copyWith(
+          juegos: juegosActualizados,
+        );
+        
+        final listasActualizadas = List<GameList>.from(_usuario!.listas);
+        listasActualizadas[listaIndex] = listaActualizada;
+        
+        _usuario = _usuario!.copyWith(
+          listas: listasActualizadas,
+        );
+        
+        notifyListeners();
+      }
     } catch (e) {
-      print('Error al agregar juego a lista: $e');
-      _errorMessage = 'Error al agregar juego a lista: $e';
-      _isLoading = false;
-      notifyListeners();
-      return false;
+      print('Error al añadir juego a la lista: $e');
+      throw e;
     }
+  }
+  
+  // Método para convertir un Map<String, dynamic> a un objeto GameInList
+  GameInList _crearGameInList(Map<String, dynamic> datos) {
+    return GameInList(
+      gameId: datos['id'] ?? '',
+      nombre: datos['nombre'] ?? '',
+      imagenUrl: datos['imagen'],
+      fechaAgregado: datos['fechaAgregado'] != null 
+          ? DateTime.parse(datos['fechaAgregado'].toString())
+          : DateTime.now(),
+    );
   }
 
   // Reiniciar mensajes de error

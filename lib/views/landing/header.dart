@@ -247,62 +247,141 @@ class _HeaderState extends State<Header> {
         width: double.infinity,
         decoration: BoxDecoration(
           color: AppTheme.primaryDark.withOpacity(0.95),
-          border: Border.all(
-            color: AppTheme.accentBlue.withOpacity(0.1),
-            width: 1,
+          border: Border(
+            bottom: BorderSide(
+              color: AppTheme.accentBlue.withOpacity(0.3),
+              width: 1,
+            ),
           ),
-          borderRadius: const BorderRadius.only(
-            bottomLeft: Radius.circular(16),
-            bottomRight: Radius.circular(16),
-          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
-        margin: const EdgeInsets.only(top: 2),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
           children: [
-            // Navegación principal
-            _MobileNavItem(
+            // Elementos de navegación
+            _buildMobileMenuItem(
               icon: Icons.home,
               title: 'Inicio',
               onTap: () => _navigateTo('/'),
             ),
-            _MobileNavItem(
+            
+            _buildMobileMenuItem(
               icon: Icons.games,
               title: 'Juegos',
               onTap: () => _checkAuthAndNavigate('/games', 'juegos'),
             ),
-            _MobileNavItem(
+            
+            _buildMobileMenuItem(
               icon: Icons.forum,
               title: 'Foro',
               onTap: () => _checkAuthAndNavigate('/forum', 'foro'),
             ),
             
-            const Divider(color: Colors.white24, height: 24),
-            
-            // Opciones de usuario
-            if (isLoggedIn) ...[
-              _MobileNavItem(
-                icon: Icons.person,
-                title: 'Mi Perfil',
-                onTap: () => _navigateTo('/profile'),
+            // Botón de inicio de sesión/cierre de sesión
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    if (isLoggedIn) {
+                      // Cerrar sesión
+                      showDialog(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          backgroundColor: AppTheme.secondaryDark,
+                          title: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
+                          content: const Text('¿Seguro que deseas cerrar sesión?', style: TextStyle(color: Colors.white70)),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx),
+                              child: const Text('Cancelar'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                context.read<AuthViewModel>().signOut();
+                                Navigator.pop(ctx);
+                                setState(() => _isMenuOpen = false);
+                              },
+                              child: const Text('Cerrar sesión'),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      // Iniciar sesión
+                      _navigateTo('/login');
+                    }
+                  },
+                  icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
+                  label: Text(isLoggedIn ? 'Cerrar sesión' : 'Iniciar sesión'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isLoggedIn ? Colors.red.shade700 : AppTheme.accentBlue,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
               ),
-              _MobileNavItem(
-                icon: Icons.logout,
-                title: 'Cerrar Sesión',
-                onTap: () {
-                  context.read<AuthViewModel>().signOut();
-                  _navigateTo('/');
-                },
-              ),
-            ] else
-              _MobileNavItem(
-                icon: Icons.login,
-                title: 'Iniciar Sesión',
-                onTap: () => _navigateTo('/signup'),
-              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+  
+  // Widget para los ítems del menú móvil
+  Widget _buildMobileMenuItem({
+    required IconData icon,
+    required String title,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        // Aseguramos que el InkWell siempre responda a los eventos touch/mouse
+        hoverColor: AppTheme.accentBlue.withOpacity(0.1),
+        splashColor: AppTheme.accentBlue.withOpacity(0.2),
+        highlightColor: AppTheme.accentBlue.withOpacity(0.1),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: AppTheme.accentBlue.withOpacity(0.1),
+                  width: 1,
+                ),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  icon,
+                  color: AppTheme.accentBlue,
+                  size: 20,
+                ),
+                const SizedBox(width: 16),
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    color: AppTheme.secondaryLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -314,11 +393,8 @@ class _HeaderState extends State<Header> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.secondaryDark,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
         title: Text(
-          'Autenticación Requerida',
+          'Acceso Restringido',
           style: GoogleFonts.montserrat(
             color: AppTheme.secondaryLight,
             fontWeight: FontWeight.bold,
@@ -326,27 +402,19 @@ class _HeaderState extends State<Header> {
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
-              Icons.lock_outline,
+              Icons.lock,
               color: AppTheme.accentBlue,
               size: 48,
             ),
             const SizedBox(height: 16),
             Text(
-              'Para acceder a la sección de $section necesitas iniciar sesión o crear una cuenta.',
+              'Necesitas iniciar sesión para acceder a la sección de $section.',
               style: GoogleFonts.inter(
                 color: AppTheme.secondaryLight.withOpacity(0.9),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Crea una cuenta gratis y disfruta de todas las funcionalidades de TRAKR.',
-              style: GoogleFonts.inter(
-                color: AppTheme.secondaryLight.withOpacity(0.7),
-                fontSize: 13,
-              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
@@ -367,36 +435,9 @@ class _HeaderState extends State<Header> {
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.accentBlue,
-              foregroundColor: AppTheme.secondaryLight,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
+              foregroundColor: Colors.white,
             ),
-            child: Text(
-              'Iniciar Sesión',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              context.go('/signup');
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentGreen,
-              foregroundColor: AppTheme.secondaryLight,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-            child: Text(
-              'Registrarse',
-              style: GoogleFonts.inter(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: Text('Iniciar Sesión'),
           ),
         ],
       ),
@@ -420,61 +461,27 @@ class _NavItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: isActive
-            ? BoxDecoration(
-                color: AppTheme.accentBlue.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              )
-            : null,
-        child: Text(
-          title,
-          style: GoogleFonts.inter(
-            fontSize: 14,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: isActive ? AppTheme.accentBlue : AppTheme.secondaryLight,
+      hoverColor: AppTheme.accentBlue.withOpacity(0.1),
+      splashColor: AppTheme.accentBlue.withOpacity(0.2),
+      highlightColor: AppTheme.accentBlue.withOpacity(0.1),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: isActive
+              ? BoxDecoration(
+                  color: AppTheme.accentBlue.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(16),
+                )
+              : null,
+          child: Text(
+            title,
+            style: GoogleFonts.inter(
+              fontSize: 14,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+              color: isActive ? AppTheme.accentBlue : AppTheme.secondaryLight,
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _MobileNavItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _MobileNavItem({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: AppTheme.accentBlue,
-              size: 22,
-            ),
-            const SizedBox(width: 16),
-            Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ],
         ),
       ),
     );

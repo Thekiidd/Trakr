@@ -10,6 +10,8 @@ import 'package:go_router/go_router.dart';
 import '../../widgets/custom_app_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
+import '../../services/api_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,6 +22,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   bool _isEditing = false;
+  bool _isLoading = false;
   late TabController _tabController;
   final TextEditingController _biografiaController = TextEditingController();
   final ServicioUsuario _servicioUsuario = ServicioUsuario();
@@ -778,7 +781,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           SizedBox(height: 8),
                           Center(
                             child: ElevatedButton.icon(
-                              onPressed: () => _agregarJuegoALista(lista),
+                              onPressed: () => _showAddGameDialog(lista.id, lista.nombre),
                               icon: Icon(Icons.add_circle_outline, size: 18),
                               label: Text('Añadir Juego'),
                               style: ElevatedButton.styleFrom(
@@ -1228,51 +1231,206 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
   
-  void _agregarJuegoALista(GameList lista) {
-    // En una implementación real, aquí mostrarías un diálogo o navegarías a una pantalla
-    // para buscar y seleccionar juegos. Por ahora, mostraremos un diálogo simple.
+  void _showAddGameDialog(String listId, String listName) {
+    final TextEditingController _searchController = TextEditingController();
+    bool _buscando = false;
+    List<dynamic> _juegosEncontrados = [];
     
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.secondaryDark,
-        title: Text(
-          'Añadir Juego a la Lista',
-          style: GoogleFonts.montserrat(
-            color: AppTheme.secondaryLight,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.construction,
-              size: 48,
-              color: AppTheme.accentBlue,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Esta funcionalidad se implementará próximamente. Podrás buscar y agregar juegos a tus listas personalizadas.',
-              style: GoogleFonts.inter(
-                color: AppTheme.secondaryLight,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: AppTheme.secondaryDark,
+              title: Text(
+                'Añadir juego a "$listName"',
+                style: GoogleFonts.inter(
+                  color: AppTheme.secondaryLight,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.accentBlue,
-              foregroundColor: Colors.white,
-            ),
-            child: Text('Entendido'),
-          ),
-        ],
-      ),
+              content: Container(
+                width: double.maxFinite,
+                constraints: BoxConstraints(maxHeight: 400),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Campo de búsqueda
+                    TextField(
+                      controller: _searchController,
+                      style: GoogleFonts.inter(color: AppTheme.secondaryLight),
+                      decoration: InputDecoration(
+                        hintText: 'Buscar juego...',
+                        hintStyle: GoogleFonts.inter(color: AppTheme.secondaryLight.withOpacity(0.5)),
+                        prefixIcon: Icon(Icons.search, color: AppTheme.secondaryLight),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppTheme.accentBlue),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
+                        ),
+                      ),
+                      onSubmitted: (value) async {
+                        if (value.isEmpty) return;
+                        
+                        setState(() {
+                          _buscando = true;
+                        });
+                        
+                        try {
+                          // Usar la API real
+                          final apiService = Provider.of<ApiService>(context, listen: false);
+                          final games = await apiService.fetchGames(searchQuery: value);
+                          
+                          setState(() {
+                            _juegosEncontrados = games.map((game) => {
+                              'id': game.id,
+                              'nombre': game.title,
+                              'imagen': game.coverImage,
+                            }).toList();
+                            _buscando = false;
+                          });
+                        } catch (e) {
+                          setState(() {
+                            _buscando = false;
+                            // Mensaje de error
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Error al buscar juegos: $e'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          });
+                        }
+                      },
+                    ),
+                    
+                    SizedBox(height: 16),
+                    
+                    // Resultados o indicador de carga
+                    Expanded(
+                      child: _buscando
+                        ? Center(child: CircularProgressIndicator(color: AppTheme.accentBlue))
+                        : _juegosEncontrados.isEmpty
+                          ? Center(
+                              child: Text(
+                                'Busca un juego para añadirlo a tu lista',
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.secondaryLight.withOpacity(0.7),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : ListView.builder(
+                              itemCount: _juegosEncontrados.length,
+                              itemBuilder: (context, index) {
+                                final juego = _juegosEncontrados[index];
+                                return ListTile(
+                                  leading: juego['imagen'] != null && juego['imagen'].isNotEmpty
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: Image.network(
+                                          juego['imagen'],
+                                          width: 50,
+                                          height: 50,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) => 
+                                            Container(
+                                              width: 50,
+                                              height: 50,
+                                              color: AppTheme.accentBlue.withOpacity(0.2),
+                                              child: Icon(Icons.videogame_asset, color: AppTheme.accentBlue),
+                                            ),
+                                        ),
+                                      )
+                                    : Container(
+                                        width: 50,
+                                        height: 50,
+                                        color: AppTheme.accentBlue.withOpacity(0.2),
+                                        child: Icon(Icons.videogame_asset, color: AppTheme.accentBlue),
+                                      ),
+                                  title: Text(
+                                    juego['nombre'],
+                                    style: GoogleFonts.inter(
+                                      color: AppTheme.secondaryLight,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  onTap: () async {
+                                    // Cerrar diálogo
+                                    Navigator.pop(context);
+                                    
+                                    // Mostrar indicador de carga
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Añadiendo juego a la lista...'),
+                                        duration: Duration(seconds: 1),
+                                      ),
+                                    );
+                                    
+                                    try {
+                                      // Implementar la lógica para añadir el juego a la lista del usuario
+                                      await _agregarJuegoALista(listId, juego['id'], juego['nombre'], juego['imagen']);
+                                      
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('¡Juego añadido a la lista!'),
+                                          backgroundColor: AppTheme.accentGreen,
+                                        ),
+                                      );
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('Error: $e'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Cancelar',
+                    style: GoogleFonts.inter(
+                      color: AppTheme.secondaryLight.withOpacity(0.7),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
+  }
+  
+  // Método para añadir un juego a una lista
+  Future<void> _agregarJuegoALista(String listId, String gameId, String gameName, String gameImage) async {
+    try {
+      final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+      
+      // Aquí implementarías la lógica para añadir el juego a la lista del usuario en Firestore
+      await userViewModel.agregarJuegoALista(listId, {
+        'id': gameId,
+        'nombre': gameName,
+        'imagen': gameImage,
+        'fechaAgregado': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      print('Error al añadir juego a la lista: $e');
+      throw e;
+    }
   }
 
   Widget _construirSeccionEstadisticas(UsuarioModelo usuario) {
@@ -1583,17 +1741,85 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   
   // Función para elegir imagen de perfil
   Future<void> _seleccionarImagenPerfil() async {
-    // Aquí implementarías la lógica para seleccionar una imagen
-    // En Web utilizarías html.FileUploadInputElement()
-    // En móvil utilizarías image_picker
-    
-    // Para la demo, mostramos un diálogo indicando que está en desarrollo
+    try {
+      // Mostrar opciones: cámara o galería
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: AppTheme.secondaryDark,
+        builder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.photo_library, color: AppTheme.secondaryLight),
+              title: Text('Seleccionar de la galería', 
+                style: GoogleFonts.inter(color: AppTheme.secondaryLight)),
+              onTap: () async {
+                Navigator.pop(context);
+                // Aquí debes implementar la selección de imagen desde la galería
+                // Para implementación completa, necesitas usar image_picker package
+                
+                // Código simulado para selección de imagen
+                // final picker = ImagePicker();
+                // final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+                
+                // Si estás en web, muestra un diálogo temporal
+                if (kIsWeb) {
+                  _mostrarDialogoSeleccionImagen();
+                  return;
+                }
+                
+                // En una aplicación real, aquí iría:
+                // if (pickedFile != null) {
+                //   _imagenPerfilSeleccionada = File(pickedFile.path);
+                //   _subirImagenPerfil();
+                // }
+              },
+            ),
+            ListTile(
+              leading: Icon(Icons.camera_alt, color: AppTheme.secondaryLight),
+              title: Text('Tomar una foto', 
+                style: GoogleFonts.inter(color: AppTheme.secondaryLight)),
+              onTap: () async {
+                Navigator.pop(context);
+                // Aquí debes implementar la captura de imagen con la cámara
+                // Para implementación completa, necesitas usar image_picker package
+                
+                // Código simulado para tomar foto
+                // final picker = ImagePicker();
+                // final pickedFile = await picker.pickImage(source: ImageSource.camera);
+                
+                // Si estás en web, muestra un diálogo temporal
+                if (kIsWeb) {
+                  _mostrarDialogoSeleccionImagen();
+                  return;
+                }
+                
+                // En una aplicación real, aquí iría:
+                // if (pickedFile != null) {
+                //   _imagenPerfilSeleccionada = File(pickedFile.path);
+                //   _subirImagenPerfil();
+                // }
+              },
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      print('Error al seleccionar imagen: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error al seleccionar imagen: $e')),
+      );
+    }
+  }
+  
+  // Diálogo temporal para indicar cómo implementar la subida de imagen en web
+  void _mostrarDialogoSeleccionImagen() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.secondaryDark,
         title: Text(
-          'Cambiar Imagen de Perfil',
+          'Implementación para Web',
           style: GoogleFonts.montserrat(
             color: AppTheme.secondaryLight,
             fontWeight: FontWeight.bold,
@@ -1603,13 +1829,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.construction,
+              Icons.info_outline,
               size: 48,
               color: AppTheme.accentBlue,
             ),
             SizedBox(height: 16),
             Text(
-              'Esta funcionalidad se implementará próximamente.',
+              'Para implementar la selección de archivos en Flutter Web, debes usar:'
+              '\n\nhtml.FileUploadInputElement()\n\nY luego procesar los bytes con Firebase Storage.',
               style: GoogleFonts.inter(
                 color: AppTheme.secondaryLight,
               ),
@@ -1621,7 +1848,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
-              'Aceptar',
+              'Entendido',
               style: GoogleFonts.inter(
                 color: AppTheme.accentBlue,
               ),
@@ -1632,6 +1859,53 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
   
+  // Función para subir la imagen seleccionada a Firebase
+  Future<void> _subirImagenPerfil() async {
+    if (_imagenPerfilSeleccionada == null) return;
+    
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      // Subir imagen usando el servicio de usuario
+      final url = await _servicioUsuario.subirImagenPerfil(
+        _imagenPerfilSeleccionada!,
+        _userViewModel.usuario!.uid,
+      );
+      
+      if (url != null) {
+        // Actualizar el perfil con la nueva URL
+        final updatedUser = _userViewModel.usuario!.copyWith(
+          fotoUrl: url,
+        );
+        
+        // Actualizar en el ViewModel
+        _userViewModel.updateUser(updatedUser);
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Imagen de perfil actualizada'),
+            backgroundColor: AppTheme.accentGreen,
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error al subir imagen: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al subir imagen: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+        _imagenPerfilSeleccionada = null;
+      });
+    }
+  }
+
   // Función para elegir imagen de banner
   Future<void> _seleccionarImagenBanner() async {
     // Similar a la función para seleccionar imagen de perfil

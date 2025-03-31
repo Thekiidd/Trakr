@@ -16,7 +16,6 @@ class ForumScreen extends StatefulWidget {
 }
 
 class _ForumScreenState extends State<ForumScreen> {
-  final ForumService _forumService = ForumService();
   List<ForumPost> _posts = [];
   bool _isLoading = false;
   DocumentSnapshot? _lastDocument;
@@ -32,7 +31,8 @@ class _ForumScreenState extends State<ForumScreen> {
     
     setState(() => _isLoading = true);
     try {
-      final newPosts = await _forumService.getPosts(
+      final forumService = Provider.of<ForumService>(context, listen: false);
+      final newPosts = await forumService.getPosts(
         startAfter: _lastDocument,
       );
       setState(() {
@@ -136,73 +136,192 @@ class _ForumScreenState extends State<ForumScreen> {
   }
 
   void _showCreatePostDialog() {
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController contentController = TextEditingController();
+    bool isPosting = false;
+    
+    // Obtener el ForumService fuera del diálogo
+    final forumService = Provider.of<ForumService>(context, listen: false);
+    
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.secondaryDark,
-        title: Text(
-          'Nueva Publicación',
-          style: GoogleFonts.inter(
-            color: Colors.white,
-          ),
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              style: GoogleFonts.inter(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'Título',
-                labelStyle: GoogleFonts.inter(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white70),
-                ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppTheme.accentBlue),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              backgroundColor: AppTheme.secondaryDark,
+              title: Text(
+                'Nueva Publicación',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            SizedBox(height: 16),
-            TextField(
-              style: GoogleFonts.inter(color: Colors.white),
-              maxLines: 5,
-              decoration: InputDecoration(
-                labelText: 'Contenido',
-                labelStyle: GoogleFonts.inter(color: Colors.white70),
-                enabledBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: Colors.white70),
+              content: Container(
+                width: double.maxFinite,
+                constraints: BoxConstraints(maxHeight: 400),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Título del post
+                    TextField(
+                      controller: titleController,
+                      style: GoogleFonts.inter(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Título',
+                        labelStyle: GoogleFonts.inter(color: Colors.white70),
+                        enabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white70),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: AppTheme.accentBlue),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    
+                    // Contenido del post
+                    Expanded(
+                      child: TextField(
+                        controller: contentController,
+                        style: GoogleFonts.inter(color: Colors.white),
+                        maxLines: null,
+                        expands: true,
+                        decoration: InputDecoration(
+                          labelText: 'Contenido',
+                          alignLabelWithHint: true,
+                          labelStyle: GoogleFonts.inter(color: Colors.white70),
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.white70),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: AppTheme.accentBlue),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-                focusedBorder: UnderlineInputBorder(
-                  borderSide: BorderSide(color: AppTheme.accentBlue),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: isPosting 
+                    ? null 
+                    : () => Navigator.pop(context),
+                  child: Text(
+                    'Cancelar',
+                    style: GoogleFonts.inter(
+                      color: isPosting 
+                        ? Colors.white38 
+                        : Colors.white70,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Cancelar',
-              style: GoogleFonts.inter(
-                color: Colors.white70,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              // TODO: Implementar creación de post
-              Navigator.pop(context);
-            },
-            child: Text(
-              'Publicar',
-              style: GoogleFonts.inter(
-                color: AppTheme.accentBlue,
-              ),
-            ),
-          ),
-        ],
-      ),
+                ElevatedButton(
+                  onPressed: isPosting 
+                    ? null 
+                    : () async {
+                      // Validar campos
+                      if (titleController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('El título es obligatorio')),
+                        );
+                        return;
+                      }
+                      
+                      if (contentController.text.trim().isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('El contenido es obligatorio')),
+                        );
+                        return;
+                      }
+                      
+                      // Mostrar indicador de carga
+                      setState(() {
+                        isPosting = true;
+                      });
+                      
+                      try {
+                        // Obtener el nombre de usuario antes de crear el post
+                        final userId = forumService.getCurrentUserId() ?? 'anonymous';
+                        final authorName = await forumService.getCurrentUsername() ?? 'Usuario Anónimo';
+                        
+                        // Crear objeto de post
+                        final newPost = ForumPost(
+                          id: '',  // Se asignará por Firestore
+                          userId: userId,
+                          title: titleController.text.trim(),
+                          content: contentController.text.trim(),
+                          gameId: '',  // Campo requerido, se puede dejar vacío por ahora
+                          authorName: authorName,
+                          createdAt: DateTime.now(),
+                          updatedAt: DateTime.now(),  // Campo requerido que faltaba
+                          likes: 0,
+                          comments: 0,
+                          isPinned: false,
+                          likedBy: [],
+                        );
+                        
+                        // Crear post en Firestore
+                        final String? postId = await forumService.createPost(newPost);
+                        
+                        if (postId != null) {
+                          // Cerrar diálogo
+                          Navigator.pop(context);
+                          
+                          // Actualizar lista de posts
+                          setState(() {
+                            _posts.clear();
+                            _lastDocument = null;
+                          });
+                          await _loadPosts();
+                          
+                          // Mostrar mensaje de éxito
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('¡Publicación creada con éxito!'),
+                              backgroundColor: Colors.green,
+                            ),
+                          );
+                        } else {
+                          throw Exception('No se pudo crear la publicación');
+                        }
+                      } catch (e) {
+                        // Mostrar error
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error al crear la publicación: $e'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                        
+                        // Restaurar estado
+                        setState(() {
+                          isPosting = false;
+                        });
+                      }
+                    },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentBlue,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: AppTheme.accentBlue.withOpacity(0.3),
+                  ),
+                  child: isPosting
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text('Publicar'),
+                ),
+              ],
+            );
+          }
+        );
+      },
     );
   }
 } 
