@@ -51,7 +51,31 @@ class ServicioUsuario {
       // Intentar obtener el perfil de Firestore
       DocumentSnapshot doc = await _db.collection('usuarios').doc(uid).get();
       if (doc.exists) {
-        return doc.data() as Map<String, dynamic>;
+        Map<String, dynamic> datos = doc.data() as Map<String, dynamic>;
+        
+        // Asegurar que los campos numéricos sean enteros
+        datos['juegosCompletados'] = (datos['juegosCompletados'] ?? 0).toInt();
+        datos['totalHorasJugadas'] = (datos['totalHorasJugadas'] ?? 0).toInt();
+        datos['logrosDesbloqueados'] = (datos['logrosDesbloqueados'] ?? 0).toInt();
+        
+        // Asegurar que las listas existan y tengan el formato correcto
+        if (datos['listas'] != null) {
+          List<dynamic> listas = List.from(datos['listas']);
+          for (var i = 0; i < listas.length; i++) {
+            if (listas[i]['juegos'] != null) {
+              for (var juego in listas[i]['juegos']) {
+                if (juego['tiempoJugado'] != null) {
+                  juego['tiempoJugado'] = (juego['tiempoJugado'] ?? 0).toInt();
+                }
+              }
+            }
+          }
+          datos['listas'] = listas;
+        } else {
+          datos['listas'] = [];
+        }
+        
+        return datos;
       }
       
       // Si no existe, crear un perfil con datos predeterminados
@@ -70,41 +94,22 @@ class ServicioUsuario {
         'siguiendo': [],
         'ultimaConexion': Timestamp.now(),
         'nivelUsuario': 'Novato',
-        'juegosRecientes': ['Grand Theft Auto V', 'The Witcher 3', 'Cyberpunk 2077'],
+        'juegosRecientes': [],
+        'listas': [],
         'bannerUrl': 'https://firebasestorage.googleapis.com/v0/b/flutter-web-app-80ca6.appspot.com/o/default-banner.jpg?alt=media',
       };
       
-      // Intentar guardar el perfil predeterminado (pero continuar incluso si falla)
+      // Intentar guardar el perfil predeterminado
       try {
         await _db.collection('usuarios').doc(uid).set(perfilPredeterminado);
       } catch (e) {
         print('Error al guardar perfil predeterminado: $e');
-        // No propagamos la excepción
       }
       
       return perfilPredeterminado;
     } catch (e) {
       print('Error al obtener el perfil: $e');
-      
-      // Proporcionar un perfil predeterminado en caso de error de permisos
-      final user = FirebaseAuth.instance.currentUser;
-      return {
-        'uid': uid,
-        'email': user?.email ?? 'usuario@ejemplo.com',
-        'nombreUsuario': user?.displayName ?? user?.email?.split('@')[0] ?? 'Usuario',
-        'fotoUrl': user?.photoURL,
-        'biografia': 'Perfil temporal. Por favor, verifica la configuración de Firebase.',
-        'fechaRegistro': Timestamp.now(),
-        'juegosCompletados': 0,
-        'totalHorasJugadas': 0,
-        'logrosDesbloqueados': 0,
-        'seguidores': [],
-        'siguiendo': [],
-        'ultimaConexion': Timestamp.now(),
-        'nivelUsuario': 'Novato',
-        'juegosRecientes': ['Grand Theft Auto V', 'The Witcher 3', 'Cyberpunk 2077'],
-        'bannerUrl': 'https://firebasestorage.googleapis.com/v0/b/flutter-web-app-80ca6.appspot.com/o/default-banner.jpg?alt=media',
-      };
+      return null;
     }
   }
 
@@ -446,6 +451,11 @@ class ServicioUsuario {
     required String gameId,
     required String nombre,
     String? imagenUrl,
+    int tiempoJugado = 0,
+    double rating = 0.0,
+    String estado = 'Jugando',
+    String? plataforma,
+    String? notas,
   }) async {
     try {
       // Obtener el documento del usuario
@@ -462,35 +472,46 @@ class ServicioUsuario {
       // Obtener el array de listas
       List<dynamic> listas = List.from(userData['listas'] ?? []);
       
-      // Encontrar la lista donde añadir el juego
-      int index = listas.indexWhere((lista) => lista['id'] == listaId);
-      
-      if (index == -1) {
-        throw Exception('Lista no encontrada');
+      // Verificar si la lista existe
+      final listaIndex = listas.indexWhere((lista) => lista['id'] == listaId);
+      if (listaIndex == -1) {
+        throw Exception('La lista no existe');
       }
       
-      // Crear objeto del juego
+      // Crear el objeto del juego
       final nuevoJuego = {
-        'gameId': gameId,
+        'id': gameId,
         'nombre': nombre,
         'imagenUrl': imagenUrl,
         'fechaAgregado': DateTime.now().toIso8601String(),
+        'tiempoJugado': tiempoJugado,
+        'rating': rating,
+        'estado': estado,
+        'plataforma': plataforma,
+        'notas': notas,
       };
       
-      // Verificar si el juego ya existe en la lista
-      List<dynamic> juegos = List.from(listas[index]['juegos'] ?? []);
-      bool juegoExiste = juegos.any((juego) => juego['gameId'] == gameId);
+      // Inicializar el array de juegos si no existe
+      if (!listas[listaIndex].containsKey('juegos')) {
+        listas[listaIndex]['juegos'] = [];
+      }
       
-      if (!juegoExiste) {
-        // Añadir el juego a la lista
+      // Verificar si el juego ya existe en la lista
+      List<dynamic> juegos = List.from(listas[listaIndex]['juegos']);
+      if (!juegos.any((juego) => juego['id'] == gameId)) {
+        // Agregar el juego a la lista específica
         juegos.add(nuevoJuego);
-        listas[index]['juegos'] = juegos;
+        listas[listaIndex]['juegos'] = juegos;
         
-        // Actualizar el documento
-        await docRef.update({'listas': listas});
+        // Actualizar el documento con los cambios
+        await docRef.update({
+          'listas': listas,
+          'juegosCompletados': estado == 'Completado' ? FieldValue.increment(1) : FieldValue.increment(0),
+          'totalHorasJugadas': FieldValue.increment(tiempoJugado ~/ 60),
+        });
       }
     } catch (e) {
-      print('Error al añadir juego a la lista: $e');
+      print('Error al agregar juego a la lista: $e');
       rethrow;
     }
   }
@@ -534,6 +555,93 @@ class ServicioUsuario {
     } catch (e) {
       print('Error al eliminar juego de la lista: $e');
       rethrow;
+    }
+  }
+
+  // Obtener todos los juegos del usuario (de todas las listas)
+  Future<List<Map<String, dynamic>>> obtenerTodosLosJuegos(String uid) async {
+    try {
+      DocumentSnapshot doc = await _db.collection('usuarios').doc(uid).get();
+      if (!doc.exists) {
+        return [];
+      }
+
+      Map<String, dynamic> datos = doc.data() as Map<String, dynamic>;
+      if (!datos.containsKey('listas')) {
+        return [];
+      }
+
+      // Mapa para evitar duplicados (por ID de juego)
+      Map<String, Map<String, dynamic>> juegosMap = {};
+
+      List<dynamic> listas = List.from(datos['listas']);
+      for (var lista in listas) {
+        if (lista.containsKey('juegos') && lista['juegos'] != null) {
+          for (var juego in lista['juegos']) {
+            // Asegurarse de que tenga un ID
+            if (juego.containsKey('id')) {
+              // Verificar las claves de imagen
+              String? imagen = juego['imagenUrl'] ?? juego['imagen'];
+              juego['imagen'] = imagen;
+              juego['imagenUrl'] = imagen;
+
+              // Usar una imagen placeholder si no hay imagen
+              if (juego['imagen'] == null || juego['imagen'] == '') {
+                juego['imagen'] = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+                juego['imagenUrl'] = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+              }
+
+              // Usando el ID como clave para evitar duplicados
+              juegosMap[juego['id'].toString()] = Map<String, dynamic>.from(juego);
+            }
+          }
+        }
+      }
+
+      // Convertir el mapa a una lista
+      List<Map<String, dynamic>> juegos = juegosMap.values.toList();
+
+      // Ordenar por fecha de agregado (más reciente primero)
+      juegos.sort((a, b) {
+        DateTime fechaA;
+        DateTime fechaB;
+        
+        try {
+          // Intentar convertir fechaAgregado según su tipo
+          if (a['fechaAgregado'] is Timestamp) {
+            fechaA = (a['fechaAgregado'] as Timestamp).toDate();
+          } else if (a['fechaAgregado'] is String) {
+            fechaA = DateTime.parse(a['fechaAgregado'] as String);
+          } else {
+            fechaA = DateTime.now();
+          }
+          
+          if (b['fechaAgregado'] is Timestamp) {
+            fechaB = (b['fechaAgregado'] as Timestamp).toDate();
+          } else if (b['fechaAgregado'] is String) {
+            fechaB = DateTime.parse(b['fechaAgregado'] as String);
+          } else {
+            fechaB = DateTime.now();
+          }
+        } catch (e) {
+          print('Error al convertir fechas: $e');
+          // En caso de error, usar la fecha actual
+          fechaA = DateTime.now();
+          fechaB = DateTime.now();
+        }
+        
+        return fechaB.compareTo(fechaA);
+      });
+
+      print("Juegos obtenidos: ${juegos.length}");
+      for (var juego in juegos) {
+        print("Juego: ${juego['nombre']} - Imagen: ${juego['imagen'] ?? 'Sin imagen'}");
+      }
+
+      return juegos;
+    } catch (e) {
+      print('Error al obtener todos los juegos: $e');
+      return [];
     }
   }
 } 

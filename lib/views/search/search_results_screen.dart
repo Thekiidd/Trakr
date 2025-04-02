@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:trakr_def/core/theme/app_theme.dart';
-import 'package:trakr_def/models/game_model.dart';
+import 'package:trakr_def/models/game.dart';
 import 'package:trakr_def/services/api_service.dart';
 import 'package:go_router/go_router.dart';
 
@@ -130,9 +130,9 @@ class GameResultCard extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              game.imageUrl != null
+              game.coverImage != null
                   ? CircleAvatar(
-                      backgroundImage: NetworkImage(game.imageUrl!),
+                      backgroundImage: NetworkImage(game.coverImage!),
                       radius: isMobile ? 20 : 25,
                       backgroundColor: Colors.grey, // Fallback si la imagen falla
                     )
@@ -147,7 +147,7 @@ class GameResultCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      game.name,
+                      game.title,
                       style: GoogleFonts.inter(
                         color: AppTheme.secondaryLight, // Texto blanco
                         fontSize: isMobile ? 16 : 18,

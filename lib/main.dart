@@ -20,6 +20,7 @@ import 'services/games_service.dart';
 import 'services/forum_service.dart';
 import 'services/api_service.dart';
 import 'views/forum/forum_screen.dart';
+import 'servicios/servicio_usuario.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,8 +42,11 @@ void main() async {
         Provider<GamesService>(create: (_) => GamesService()),
         Provider<ForumService>(create: (_) => ForumService()),
         Provider<ApiService>(create: (_) => ApiService()),
+        Provider<ServicioUsuario>(create: (_) => ServicioUsuario()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
-        ChangeNotifierProvider(create: (_) => UserViewModel()),
+        ChangeNotifierProvider(
+          create: (context) => UserViewModel(context.read<ServicioUsuario>()),
+        ),
       ],
       child: TrackGameApp(),
     ),

@@ -40,7 +40,9 @@ class UsuarioModelo {
     this.listas = listas ?? [];
 
   factory UsuarioModelo.fromMap(Map<String, dynamic> map) {
-    final DateTime fechaRegistro = (map['fechaRegistro'] as Timestamp).toDate();
+    final DateTime fechaRegistro = map['fechaRegistro'] is Timestamp
+        ? (map['fechaRegistro'] as Timestamp).toDate()
+        : DateTime.now();
     
     List<GameList> listas = [];
     if (map['listas'] != null) {
@@ -50,13 +52,13 @@ class UsuarioModelo {
     }
 
     return UsuarioModelo(
-      uid: map['uid'] as String,
-      email: map['email'] as String,
-      nombreUsuario: map['nombreUsuario'] as String,
-      fotoUrl: map['fotoUrl'] as String?,
-      bannerUrl: map['bannerUrl'] as String?,
-      biografia: map['biografia'] as String?,
-      nivelUsuario: map['nivelUsuario'] as String?,
+      uid: map['uid']?.toString() ?? '',
+      email: map['email']?.toString() ?? '',
+      nombreUsuario: map['nombreUsuario']?.toString() ?? map['email']?.toString().split('@')[0] ?? 'Usuario',
+      fotoUrl: map['fotoUrl']?.toString(),
+      bannerUrl: map['bannerUrl']?.toString(),
+      biografia: map['biografia']?.toString(),
+      nivelUsuario: map['nivelUsuario']?.toString() ?? 'Novato',
       fechaRegistro: fechaRegistro,
       seguidores: List<String>.from(map['seguidores'] ?? []),
       siguiendo: List<String>.from(map['siguiendo'] ?? []),
@@ -199,12 +201,22 @@ class GameInList {
   final String nombre;
   final String? imagenUrl;
   final DateTime fechaAgregado;
+  final int tiempoJugado; // en minutos
+  final double rating; // de 0 a 5
+  final String estado; // 'Jugando', 'Completado', 'En pausa', 'Abandonado'
+  final String? plataforma; // 'PC', 'PS5', 'Xbox', etc.
+  final String? notas; // notas personales sobre el juego
 
   GameInList({
     required this.gameId,
     required this.nombre,
     this.imagenUrl,
     required this.fechaAgregado,
+    this.tiempoJugado = 0,
+    this.rating = 0.0,
+    this.estado = 'Jugando',
+    this.plataforma,
+    this.notas,
   });
 
   factory GameInList.fromMap(Map<String, dynamic> map) {
@@ -213,19 +225,53 @@ class GameInList {
         : DateTime.parse(map['fechaAgregado'].toString());
 
     return GameInList(
-      gameId: map['gameId'] as String,
+      gameId: map['id'] as String? ?? map['gameId'] as String,
       nombre: map['nombre'] as String,
       imagenUrl: map['imagenUrl'] as String?,
       fechaAgregado: fechaAgregado,
+      tiempoJugado: map['tiempoJugado'] as int? ?? 0,
+      rating: (map['rating'] as num?)?.toDouble() ?? 0.0,
+      estado: map['estado'] as String? ?? 'Jugando',
+      plataforma: map['plataforma'] as String?,
+      notas: map['notas'] as String?,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'gameId': gameId,
+      'id': gameId,
       'nombre': nombre,
       'imagenUrl': imagenUrl,
       'fechaAgregado': fechaAgregado,
+      'tiempoJugado': tiempoJugado,
+      'rating': rating,
+      'estado': estado,
+      'plataforma': plataforma,
+      'notas': notas,
     };
+  }
+
+  GameInList copyWith({
+    String? gameId,
+    String? nombre,
+    String? imagenUrl,
+    DateTime? fechaAgregado,
+    int? tiempoJugado,
+    double? rating,
+    String? estado,
+    String? plataforma,
+    String? notas,
+  }) {
+    return GameInList(
+      gameId: gameId ?? this.gameId,
+      nombre: nombre ?? this.nombre,
+      imagenUrl: imagenUrl ?? this.imagenUrl,
+      fechaAgregado: fechaAgregado ?? this.fechaAgregado,
+      tiempoJugado: tiempoJugado ?? this.tiempoJugado,
+      rating: rating ?? this.rating,
+      estado: estado ?? this.estado,
+      plataforma: plataforma ?? this.plataforma,
+      notas: notas ?? this.notas,
+    );
   }
 } 

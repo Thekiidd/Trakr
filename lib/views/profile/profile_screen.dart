@@ -12,6 +12,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../../services/api_service.dart';
+import '../../widgets/agregar_juego_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -549,7 +550,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               children: [
                 _construirContador('Siguiendo', usuario.siguiendo.length),
                 _construirContador('Seguidores', usuario.seguidores.length),
-                _construirContador('Juegos', usuario.juegosCompletados),
+                FutureBuilder<List<Map<String, dynamic>>>(
+                  future: _servicioUsuario.obtenerTodosLosJuegos(usuario.uid),
+                  builder: (context, snapshot) {
+                    int totalJuegos = snapshot.hasData ? snapshot.data!.length : 0;
+                    return _construirContador('Juegos', totalJuegos);
+                  },
+                ),
               ],
             ),
           ],
@@ -602,34 +609,213 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Widget _construirTabJuegos(UsuarioModelo usuario) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
-    final crossAxisCount = isMobile ? 2 : 3;
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _servicioUsuario.obtenerTodosLosJuegos(usuario.uid),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    if (usuario.juegosRecientes.isEmpty) {
-      return _buildEmptyState(
-        'No has agregado ningún juego todavía',
-        'Explora juegos y agrégalos a tu colección para verlos aquí',
-        Icons.videogame_asset_outlined,
-      );
-    }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text(
+              'Error al cargar los juegos: ${snapshot.error}',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
+        }
 
-    return Container(
-      color: AppTheme.primaryDark,
-      child: GridView.builder(
-        padding: EdgeInsets.all(16),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          childAspectRatio: 0.7,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: usuario.juegosRecientes.length,
-        itemBuilder: (context, index) {
-          return _construirTarjetaJuego(usuario.juegosRecientes[index]);
-        },
-      ),
+        final juegos = snapshot.data ?? [];
+
+        if (juegos.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.games_outlined,
+                  size: 64,
+                  color: AppTheme.secondaryLight.withOpacity(0.5),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'No hay juegos en tus listas',
+                  style: GoogleFonts.inter(
+                    color: AppTheme.secondaryLight,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Agrega juegos a tus listas para verlos aquí',
+                  style: GoogleFonts.inter(
+                    color: AppTheme.secondaryLight.withOpacity(0.7),
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(12),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            childAspectRatio: 0.85,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemCount: juegos.length,
+          itemBuilder: (context, index) {
+            final juego = juegos[index];
+            return Container(
+              decoration: BoxDecoration(
+                color: AppTheme.secondaryDark,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Imagen del juego
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(8)),
+                    child: AspectRatio(
+                      aspectRatio: 16 / 12,
+                      child: Image.network(
+                        juego['imagen'] ?? juego['imagenUrl'] ?? '',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            color: AppTheme.secondaryDark,
+                            child: const Icon(Icons.games, size: 28),
+                          );
+                        },
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Container(
+                            color: AppTheme.secondaryDark,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: AppTheme.accentBlue,
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  
+                  // Información del juego
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Nombre del juego
+                          Text(
+                            juego['nombre'] ?? 'Sin nombre',
+                            style: GoogleFonts.inter(
+                              color: AppTheme.secondaryLight,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          
+                          // Espaciado mínimo
+                          const SizedBox(height: 2),
+                          
+                          // Fila con rating y tiempo
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.star,
+                                size: 10,
+                                color: Colors.amber,
+                              ),
+                              const SizedBox(width: 1),
+                              Text(
+                                '${juego['rating'] ?? 0}',
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.secondaryLight,
+                                  fontSize: 9,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                Icons.timer,
+                                size: 10,
+                                color: AppTheme.accentBlue,
+                              ),
+                              const SizedBox(width: 1),
+                              Text(
+                                '${juego['tiempoJugado'] ?? 0}h',
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.secondaryLight,
+                                  fontSize: 9,
+                                ),
+                              ),
+                            ],
+                          ),
+                          
+                          // Indicador de estado del juego
+                          Container(
+                            margin: const EdgeInsets.only(top: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 1),
+                            decoration: BoxDecoration(
+                              color: _getEstadoColor(juego['estado'] ?? ''),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: Text(
+                              juego['estado'] ?? 'Sin estado',
+                              style: GoogleFonts.inter(
+                                color: Colors.white,
+                                fontSize: 7,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  Color _getEstadoColor(String estado) {
+    switch (estado.toLowerCase()) {
+      case 'completado':
+        return Colors.green;
+      case 'jugando':
+        return Colors.blue;
+      case 'en pausa':
+        return Colors.orange;
+      case 'abandonado':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
   Widget _construirTabLogros(UsuarioModelo usuario) {
@@ -1417,19 +1603,36 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   
   // Método para añadir un juego a una lista
   Future<void> _agregarJuegoALista(String listId, String gameId, String gameName, String gameImage) async {
-    try {
-      final userViewModel = Provider.of<UserViewModel>(context, listen: false);
-      
-      // Aquí implementarías la lógica para añadir el juego a la lista del usuario en Firestore
-      await userViewModel.agregarJuegoALista(listId, {
-        'id': gameId,
-        'nombre': gameName,
-        'imagen': gameImage,
-        'fechaAgregado': DateTime.now().toIso8601String(),
-      });
-    } catch (e) {
-      print('Error al añadir juego a la lista: $e');
-      throw e;
+    final userViewModel = Provider.of<UserViewModel>(context, listen: false);
+    
+    // Mostrar el diálogo para obtener los detalles del juego
+    final detallesJuego = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (BuildContext context) {
+        return AgregarJuegoDialog(
+          juego: {
+            'id': gameId,
+            'nombre': gameName,
+            'imagen': gameImage,
+          },
+        );
+      },
+    );
+
+    if (detallesJuego != null) {
+      await userViewModel.agregarJuegoALista(
+        listId,
+        {
+          'id': gameId,
+          'nombre': gameName,
+          'imagen': gameImage,
+        },
+        tiempoJugado: detallesJuego['tiempoJugado'] as int,
+        rating: detallesJuego['rating'] as double,
+        estado: detallesJuego['estado'] as String,
+        plataforma: detallesJuego['plataforma'] as String?,
+        notas: detallesJuego['notas'] as String?,
+      );
     }
   }
 

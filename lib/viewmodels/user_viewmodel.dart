@@ -5,8 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserViewModel extends ChangeNotifier {
+  final ServicioUsuario _servicioUsuario;
   UsuarioModelo? _usuario;
-  final ServicioUsuario _servicioUsuario = ServicioUsuario();
   bool _isLoading = false;
   String? _errorMessage;
   FirebaseAuth _auth = FirebaseAuth.instance;
@@ -16,9 +16,10 @@ class UserViewModel extends ChangeNotifier {
   UsuarioModelo? get usuario => _usuario;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  ServicioUsuario get servicioUsuario => _servicioUsuario;
 
   // Constructor
-  UserViewModel() {
+  UserViewModel(this._servicioUsuario) {
     _cargarUsuarioActual();
   }
 
@@ -269,63 +270,51 @@ class UserViewModel extends ChangeNotifier {
   }
 
   // Método para añadir un juego a una lista
-  Future<void> agregarJuegoALista(String listId, Map<String, dynamic> gameData) async {
+  Future<void> agregarJuegoALista(
+    String listId, 
+    Map<String, dynamic> gameData, {
+    int tiempoJugado = 0,
+    double rating = 0.0,
+    String estado = 'Jugando',
+    String? plataforma,
+    String? notas,
+  }) async {
     try {
       if (_usuario == null || _usuario!.uid.isEmpty) {
         throw Exception('Usuario no autenticado');
       }
       
-      // Obtener referencia a la lista específica
-      final listaRef = _firestore
-          .collection('usuarios')
-          .doc(_usuario!.uid)
-          .collection('listas')
-          .doc(listId);
-          
-      // Verificar si el juego ya existe en la lista
-      final listaDoc = await listaRef.get();
-      if (!listaDoc.exists) {
-        throw Exception('La lista no existe');
+      // Asegurarnos de que los datos del juego estén en el formato correcto
+      final gameId = gameData['id']?.toString() ?? '';
+      final gameName = gameData['nombre']?.toString() ?? '';
+      final gameImage = gameData['imagenUrl']?.toString() ?? gameData['imagen']?.toString();
+      
+      if (gameId.isEmpty || gameName.isEmpty) {
+        throw Exception('Datos del juego incompletos');
       }
       
-      final listaData = listaDoc.data() as Map<String, dynamic>;
-      final juegos = listaData['juegos'] as List<dynamic>? ?? [];
+      // Agregar el juego a la lista en Firestore
+      await _servicioUsuario.agregarJuegoALista(
+        uid: _usuario!.uid,
+        listaId: listId,
+        gameId: gameId,
+        nombre: gameName,
+        imagenUrl: gameImage,
+        tiempoJugado: tiempoJugado,
+        rating: rating,
+        estado: estado,
+        plataforma: plataforma,
+        notas: notas,
+      );
       
-      // Verificar si el juego ya está en la lista
-      final existeJuego = juegos.any((juego) => juego['id'] == gameData['id']);
-      if (existeJuego) {
-        throw Exception('El juego ya está en la lista');
-      }
+      // Recargar los datos del usuario para asegurar sincronización
+      await cargarPerfilUsuario(_usuario!.uid);
       
-      // Añadir el juego a la lista
-      await listaRef.update({
-        'juegos': FieldValue.arrayUnion([gameData]),
-        'actualizadoEn': DateTime.now().toIso8601String(),
-      });
-      
-      // Actualizar la información en la memoria
-      final listaIndex = _usuario!.listas.indexWhere((lista) => lista.id == listId);
-      if (listaIndex >= 0) {
-        // Crear un objeto GameInList a partir del Map
-        final nuevoJuego = _crearGameInList(gameData);
-        final juegosActualizados = List<GameInList>.from(_usuario!.listas[listaIndex].juegos)..add(nuevoJuego);
-        
-        final listaActualizada = _usuario!.listas[listaIndex].copyWith(
-          juegos: juegosActualizados,
-        );
-        
-        final listasActualizadas = List<GameList>.from(_usuario!.listas);
-        listasActualizadas[listaIndex] = listaActualizada;
-        
-        _usuario = _usuario!.copyWith(
-          listas: listasActualizadas,
-        );
-        
-        notifyListeners();
-      }
     } catch (e) {
-      print('Error al añadir juego a la lista: $e');
-      throw e;
+      print('Error al agregar juego a la lista: $e');
+      _errorMessage = 'Error al agregar juego a la lista: $e';
+      notifyListeners();
+      rethrow;
     }
   }
   
