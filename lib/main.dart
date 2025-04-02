@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
-// Para web
+// Vistas de la aplicación
 import 'views/games/games_screen.dart';
-import 'views/landing/game_details.dart' show GameDetailsScreen;
+import 'views/games/game_details_screen.dart';
 import 'views/profile/profile_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'firebase_options.dart';
@@ -18,6 +18,7 @@ import 'core/services/cache_service.dart';
 import 'services/games_service.dart';
 import 'services/forum_service.dart';
 import 'services/api_service.dart';
+import 'services/user_service.dart';
 import 'views/forum/forum_screen.dart';
 import 'servicios/servicio_usuario.dart';
 
@@ -42,6 +43,7 @@ void main() async {
         Provider<ForumService>(create: (_) => ForumService()),
         Provider<ApiService>(create: (_) => ApiService()),
         Provider<ServicioUsuario>(create: (_) => ServicioUsuario()),
+        Provider<UserService>(create: (_) => UserService()),
         ChangeNotifierProvider(create: (_) => AuthViewModel()),
         ChangeNotifierProvider(
           create: (context) => UserViewModel(context.read<ServicioUsuario>()),
@@ -98,8 +100,8 @@ class TrackGameApp extends StatelessWidget {
       GoRoute(
         path: '/game-details/:gameId',
         builder: (context, state) {
-          final gameId = int.tryParse(state.pathParameters['gameId'] ?? '');
-          if (gameId == null) {
+          final gameId = state.pathParameters['gameId'] ?? '';
+          if (gameId.isEmpty) {
             return const Scaffold(
               body: Center(
                 child: Text('ID de juego inválido'),

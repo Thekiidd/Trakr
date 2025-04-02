@@ -10,11 +10,16 @@ class AppTheme {
   static const Color accentBlue = Color(0xFF3B82F6); // Azul para gradientes (no botones)
   static const Color accentGreen = Color(0xFF10B981); // Verde para hints o detalles
   static const Color gradientStart = Color(0xFF3B82F6); // Inicio del gradiente (azul)
-  static const Color gradientEnd = Color(0xFF1E1E1E);
-
-  static var cardColor;
-
-  static var accent; // Fin del gradiente (gris oscuro)
+  static const Color gradientEnd = Color(0xFF1E1E1E); // Fin del gradiente (gris oscuro)
+  
+  // Color de tarjeta
+  static const Color cardColor = Color(0xFF1E1E1E);
+  
+  // Color de acento
+  static const Color accent = Color(0xFF3B82F6);
+  
+  // Color secundario
+  static const Color secondary = Color(0xFF4B5563);
 
   static ThemeData get darkTheme {
     return ThemeData(

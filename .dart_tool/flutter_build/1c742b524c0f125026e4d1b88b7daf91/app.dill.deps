@@ -1641,6 +1641,7 @@ file:///C:/Users/Taller/Trakr/Trakr-1/lib/models/usuario_modelo.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/services/api_service.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/services/forum_service.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/services/games_service.dart
+file:///C:/Users/Taller/Trakr/Trakr-1/lib/services/user_service.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/servicios/servicio_usuario.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/viewmodels/auth_viewmodel.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/viewmodels/user_viewmodel.dart
@@ -1648,10 +1649,10 @@ file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/auth/login_screen.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/auth/signup_screen.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/forum/forum_post_detail_screen.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/forum/forum_screen.dart
+file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/games/game_details_screen.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/games/games_screen.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/landing/features_section.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/landing/footer_section.dart
-file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/landing/game_details.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/landing/header.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/landing/hero_section.dart
 file:///C:/Users/Taller/Trakr/Trakr-1/lib/views/landing/landing_page.dart
