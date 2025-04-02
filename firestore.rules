@@ -1,0 +1,125 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Función auxiliar para verificar si el usuario está autenticado
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Función auxiliar para verificar si el usuario actual es el propietario
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Función auxiliar para verificar los campos de escritura permitidos
+    function onlyChangesAllowedFields(allowedFields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(allowedFields);
+    }
+
+    // Regla para cualquier lectura (opcional, más restrictiva)
+    match /{document=**} {
+      allow read: if true;
+    }
+
+    // Acceso a la colección de usuarios
+    match /usuarios/{userId} {
+      // Lectura: cualquiera puede leer perfiles de usuario
+      allow read: if true;
+      
+      // Escritura: solo el propio usuario puede modificar su perfil
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
+      
+      // Subcoleción de listas
+      match /listas/{listaId} {
+        allow read: if true;
+        allow write: if isOwner(userId);
+        
+        // Juegos dentro de cada lista
+        match /juegos/{juegoId} {
+          allow read: if true;
+          allow write: if isOwner(userId);
+        }
+      }
+      
+      // Subcolección de juegos (favoritos directos)
+      match /juegos/{juegoId} {
+        allow read: if true;
+        allow create, update, delete: if isOwner(userId);
+      }
+
+      // Subcolección de estadísticas
+      match /estadisticas/{estadisticaId} {
+        allow read: if true;
+        allow write: if isOwner(userId);
+      }
+      
+      // Subcolección de actividad
+      match /actividad/{actividadId} {
+        allow read: if true;
+        allow write: if isOwner(userId);
+      }
+    }
+    
+    // Colección de juegos del catálogo general
+    match /juegos/{juegoId} {
+      allow read: if true;
+      // Solo admin o usuarios verificados pueden añadir juegos al catálogo
+      allow create: if isAuthenticated() && 
+        (request.auth.token.admin == true || request.auth.token.email_verified == true);
+      allow update: if isAuthenticated() && 
+        (request.auth.token.admin == true || 
+        (resource.data.creadorId == request.auth.uid));
+      allow delete: if isAuthenticated() && 
+        (request.auth.token.admin == true || 
+        (resource.data.creadorId == request.auth.uid));
+    }
+    
+    // Colección de foro
+    match /forum_posts/{postId} {
+      allow read: if true;
+      // Cualquier usuario autenticado puede crear posts
+      allow create: if isAuthenticated();
+      // El autor puede actualizar o borrar, o cualquiera puede dar like
+      allow update: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || 
+         onlyChangesAllowedFields(['likes', 'likedBy', 'likeCount', 'comments']));
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Colección de comentarios del foro
+    match /forum_comments/{commentId} {
+      allow read: if true;
+      // Cualquier usuario autenticado puede crear comentarios
+      allow create: if isAuthenticated();
+      // El autor puede actualizar o borrar, o cualquiera puede dar like
+      allow update: if isAuthenticated() && 
+        (resource.data.userId == request.auth.uid || 
+         onlyChangesAllowedFields(['likes', 'likedBy']));
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Colección para seguimiento de usuarios
+    match /user_following/{followId} {
+      allow read: if true;
+      allow create, delete: if isAuthenticated();
+    }
+    
+    // Colección de notificaciones
+    match /notificaciones/{notificacionId} {
+      allow read: if isAuthenticated() && resource.data.destinatarioId == request.auth.uid;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+        (resource.data.destinatarioId == request.auth.uid ||
+         resource.data.emisorId == request.auth.uid);
+      allow delete: if isAuthenticated() && resource.data.destinatarioId == request.auth.uid;
+    }
+    
+    // Estadísticas globales (solo lectura para usuarios, escritura para sistema)
+    match /estadisticas_globales/{docId} {
+      allow read: if true;
+      allow write: if isAuthenticated() && request.auth.token.admin == true;
+    }
+  }
+} 

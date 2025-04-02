@@ -685,4 +685,89 @@ class ServicioUsuario {
       return [];
     }
   }
+  
+  // Obtener un stream de todos los juegos del usuario para actualizaciones en tiempo real
+  Stream<List<Map<String, dynamic>>> obtenerStreamJuegos(String uid) {
+    return _db.collection('usuarios').doc(uid)
+      .snapshots()
+      .map((snapshot) {
+        if (!snapshot.exists) {
+          return <Map<String, dynamic>>[];
+        }
+        
+        try {
+          Map<String, dynamic> datos = snapshot.data() as Map<String, dynamic>;
+          if (!datos.containsKey('listas')) {
+            return <Map<String, dynamic>>[];
+          }
+
+          // Mapa para evitar duplicados (por ID de juego)
+          Map<String, Map<String, dynamic>> juegosMap = {};
+
+          List<dynamic> listas = List.from(datos['listas']);
+          for (var lista in listas) {
+            if (lista.containsKey('juegos') && lista['juegos'] != null) {
+              for (var juego in lista['juegos']) {
+                // Asegurarse de que tenga un ID
+                if (juego.containsKey('id')) {
+                  // Verificar las claves de imagen
+                  String? imagen = juego['imagenUrl'] ?? juego['imagen'];
+                  juego['imagen'] = imagen;
+                  juego['imagenUrl'] = imagen;
+
+                  // Usar una imagen placeholder si no hay imagen
+                  if (juego['imagen'] == null || juego['imagen'] == '') {
+                    juego['imagen'] = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+                    juego['imagenUrl'] = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+                  }
+
+                  // Usando el ID como clave para evitar duplicados
+                  juegosMap[juego['id'].toString()] = Map<String, dynamic>.from(juego);
+                }
+              }
+            }
+          }
+
+          // Convertir el mapa a una lista
+          List<Map<String, dynamic>> juegos = juegosMap.values.toList();
+
+          // Ordenar por fecha de agregado (más reciente primero)
+          juegos.sort((a, b) {
+            DateTime fechaA;
+            DateTime fechaB;
+            
+            try {
+              // Intentar convertir fechaAgregado según su tipo
+              if (a['fechaAgregado'] is Timestamp) {
+                fechaA = (a['fechaAgregado'] as Timestamp).toDate();
+              } else if (a['fechaAgregado'] is String) {
+                fechaA = DateTime.parse(a['fechaAgregado'] as String);
+              } else {
+                fechaA = DateTime.now();
+              }
+              
+              if (b['fechaAgregado'] is Timestamp) {
+                fechaB = (b['fechaAgregado'] as Timestamp).toDate();
+              } else if (b['fechaAgregado'] is String) {
+                fechaB = DateTime.parse(b['fechaAgregado'] as String);
+              } else {
+                fechaB = DateTime.now();
+              }
+            } catch (e) {
+              print('Error al convertir fechas: $e');
+              // En caso de error, usar la fecha actual
+              fechaA = DateTime.now();
+              fechaB = DateTime.now();
+            }
+            
+            return fechaB.compareTo(fechaA);
+          });
+
+          return juegos;
+        } catch (e) {
+          print('Error al procesar stream de juegos: $e');
+          return <Map<String, dynamic>>[];
+        }
+      });
+  }
 } 

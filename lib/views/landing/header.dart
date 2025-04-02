@@ -95,6 +95,7 @@ class _HeaderState extends State<Header> {
                     if (MediaQuery.of(context).size.width <= 768)
                       Material(
                         color: Colors.transparent,
+                        borderRadius: BorderRadius.circular(30),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(30),
                           onTap: () {
@@ -103,11 +104,11 @@ class _HeaderState extends State<Header> {
                             });
                           },
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(12.0),
                             child: Icon(
                               _isMenuOpen ? Icons.close : Icons.menu,
                               color: AppTheme.secondaryLight,
-                              size: 24,
+                              size: 28,
                             ),
                           ),
                         ),
@@ -226,8 +227,15 @@ class _HeaderState extends State<Header> {
     
     // Función para navegar y cerrar menú
     void navigateTo(String route) {
-      context.go(route);
+      // Cerrar menú antes de navegación para evitar problemas
       setState(() => _isMenuOpen = false);
+      
+      // Pequeño retraso para que la animación del menú se complete antes de navegar
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (context.mounted) {
+          context.go(route);
+        }
+      });
     }
     
     // Función para verificar autenticación
@@ -236,7 +244,12 @@ class _HeaderState extends State<Header> {
         navigateTo(route);
       } else {
         setState(() => _isMenuOpen = false);
-        _showAuthRequiredDialog(context, section);
+        // Pequeño retraso para cerrar el menú antes
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (context.mounted) {
+            _showAuthRequiredDialog(context, section);
+          }
+        });
       }
     }
     
@@ -261,76 +274,90 @@ class _HeaderState extends State<Header> {
             ),
           ],
         ),
-        child: Column(
-          children: [
-            // Elementos de navegación
-            _buildMobileMenuItem(
-              icon: Icons.home,
-              title: 'Inicio',
-              onTap: () => navigateTo('/'),
-            ),
-            
-            _buildMobileMenuItem(
-              icon: Icons.games,
-              title: 'Juegos',
-              onTap: () => checkAuthAndNavigate('/games', 'juegos'),
-            ),
-            
-            _buildMobileMenuItem(
-              icon: Icons.forum,
-              title: 'Foro',
-              onTap: () => checkAuthAndNavigate('/forum', 'foro'),
-            ),
-            
-            // Botón de inicio de sesión/cierre de sesión
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () {
-                    if (isLoggedIn) {
-                      // Cerrar sesión
-                      showDialog(
-                        context: context,
-                        builder: (ctx) => AlertDialog(
-                          backgroundColor: AppTheme.secondaryDark,
-                          title: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
-                          content: const Text('¿Seguro que deseas cerrar sesión?', style: TextStyle(color: Colors.white70)),
-                          actions: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(ctx),
-                              child: const Text('Cancelar'),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                context.read<AuthViewModel>().signOut();
-                                Navigator.pop(ctx);
-                                setState(() => _isMenuOpen = false);
-                              },
-                              child: const Text('Cerrar sesión'),
-                            ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      // Iniciar sesión
-                      navigateTo('/login');
-                    }
-                  },
-                  icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
-                  label: Text(isLoggedIn ? 'Cerrar sesión' : 'Iniciar sesión'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isLoggedIn ? Colors.red.shade700 : AppTheme.accentBlue,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+        child: SingleChildScrollView( // Permite scroll si el menú es muy largo
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Elementos de navegación
+              _buildMobileMenuItem(
+                icon: Icons.home,
+                title: 'Inicio',
+                onTap: () => navigateTo('/'),
+              ),
+              
+              _buildMobileMenuItem(
+                icon: Icons.games,
+                title: 'Juegos',
+                onTap: () => checkAuthAndNavigate('/games', 'juegos'),
+              ),
+              
+              _buildMobileMenuItem(
+                icon: Icons.forum,
+                title: 'Foro',
+                onTap: () => checkAuthAndNavigate('/forum', 'foro'),
+              ),
+              
+              if (isLoggedIn) _buildMobileMenuItem(
+                icon: Icons.person,
+                title: 'Mi Perfil',
+                onTap: () => navigateTo('/profile'),
+              ),
+              
+              // Botón de inicio de sesión/cierre de sesión
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      if (isLoggedIn) {
+                        // Cerrar sesión
+                        setState(() => _isMenuOpen = false); // Cerrar el menú primero
+                        
+                        Future.delayed(const Duration(milliseconds: 300), () {
+                          if (context.mounted) {
+                            showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: AppTheme.secondaryDark,
+                                title: const Text('Cerrar sesión', style: TextStyle(color: Colors.white)),
+                                content: const Text('¿Seguro que deseas cerrar sesión?', style: TextStyle(color: Colors.white70)),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      context.read<AuthViewModel>().signOut();
+                                      Navigator.pop(ctx);
+                                    },
+                                    child: const Text('Cerrar sesión'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        });
+                      } else {
+                        // Iniciar sesión
+                        navigateTo('/login');
+                      }
+                    },
+                    icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
+                    label: Text(isLoggedIn ? 'Cerrar sesión' : 'Iniciar sesión'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isLoggedIn ? Colors.red.shade700 : AppTheme.accentBlue,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -342,16 +369,17 @@ class _HeaderState extends State<Header> {
     required String title,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        // Aseguramos que el InkWell siempre responda a los eventos touch/mouse
-        hoverColor: AppTheme.accentBlue.withOpacity(0.1),
-        splashColor: AppTheme.accentBlue.withOpacity(0.2),
-        highlightColor: AppTheme.accentBlue.withOpacity(0.1),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 2.0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          // Aseguramos que el InkWell siempre responda a los eventos touch/mouse
+          hoverColor: AppTheme.accentBlue.withOpacity(0.1),
+          splashColor: AppTheme.accentBlue.withOpacity(0.2),
+          highlightColor: AppTheme.accentBlue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
           child: Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 24.0),
@@ -378,6 +406,12 @@ class _HeaderState extends State<Header> {
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
+                ),
+                const Spacer(),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  color: AppTheme.accentBlue,
+                  size: 14,
                 ),
               ],
             ),
@@ -458,22 +492,17 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
+    return Material(
+      color: Colors.transparent,
       borderRadius: BorderRadius.circular(16),
-      hoverColor: AppTheme.accentBlue.withOpacity(0.1),
-      splashColor: AppTheme.accentBlue.withOpacity(0.2),
-      highlightColor: AppTheme.accentBlue.withOpacity(0.1),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          decoration: isActive
-              ? BoxDecoration(
-                  color: AppTheme.accentBlue.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
-                )
-              : null,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        hoverColor: AppTheme.accentBlue.withOpacity(0.1),
+        splashColor: AppTheme.accentBlue.withOpacity(0.2),
+        highlightColor: AppTheme.accentBlue.withOpacity(0.1),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           child: Text(
             title,
             style: GoogleFonts.inter(

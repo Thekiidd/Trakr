@@ -609,10 +609,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Widget _construirTabJuegos(UsuarioModelo usuario) {
-    return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _servicioUsuario.obtenerTodosLosJuegos(usuario.uid),
+    return StreamBuilder<List<Map<String, dynamic>>>(
+      stream: _servicioUsuario.obtenerStreamJuegos(usuario.uid),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
           return const Center(child: CircularProgressIndicator());
         }
 
@@ -1675,10 +1675,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               ],
             ),
             const SizedBox(height: 16),
-            FutureBuilder<List<Map<String, dynamic>>>(
-              future: _servicioUsuario.obtenerTodosLosJuegos(usuario.uid),
+            StreamBuilder<List<Map<String, dynamic>>>(
+              stream: _servicioUsuario.obtenerStreamJuegos(usuario.uid),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
                   return const Center(
                     child: Padding(
                       padding: EdgeInsets.all(16.0),

@@ -116,12 +116,56 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
             .doc(_game!.id)
             .delete();
         
-        // Actualizar estadísticas
-        await _firestore.collection('usuarios').doc(currentUser.uid).update({
-          'stats.totalJuegos': FieldValue.increment(-1),
-          'stats.totalFavoritos': FieldValue.increment(-1),
-          'ultimaActualizacion': FieldValue.serverTimestamp(),
-        });
+        // Eliminar también de la lista de favoritos en el documento principal
+        try {
+          final userDoc = await _firestore.collection('usuarios').doc(currentUser.uid).get();
+          
+          if (userDoc.exists) {
+            final userData = userDoc.data() as Map<String, dynamic>;
+            
+            if (userData.containsKey('listas')) {
+              List<dynamic> listas = List.from(userData['listas']);
+              
+              // Encontrar la lista de favoritos
+              int favoritosIndex = listas.indexWhere((lista) => lista['id'] == 'favoritos');
+              
+              if (favoritosIndex != -1 && listas[favoritosIndex].containsKey('juegos')) {
+                // Filtrar el juego que estamos eliminando
+                List<dynamic> juegos = List.from(listas[favoritosIndex]['juegos']);
+                juegos = juegos.where((juego) => juego['id'] != _game!.id).toList();
+                
+                // Actualizar la lista de juegos
+                listas[favoritosIndex]['juegos'] = juegos;
+                
+                // Guardar los cambios
+                await _firestore.collection('usuarios').doc(currentUser.uid).update({
+                  'listas': listas,
+                });
+              }
+            }
+          }
+        } catch (e) {
+          print('Error al eliminar juego de la lista de favoritos: $e');
+        }
+        
+        // Intentar actualizar estadísticas (podría fallar si el documento no existe)
+        try {
+          await _firestore.collection('usuarios').doc(currentUser.uid).update({
+            'stats.totalJuegos': FieldValue.increment(-1),
+            'stats.totalFavoritos': FieldValue.increment(-1),
+            'ultimaActualizacion': FieldValue.serverTimestamp(),
+          });
+        } catch (statsError) {
+          print('Error al actualizar estadísticas: $statsError');
+          // Crear documento de estadísticas si no existe
+          await _firestore.collection('usuarios').doc(currentUser.uid).set({
+            'stats': {
+              'totalJuegos': 0,
+              'totalFavoritos': 0,
+            },
+            'ultimaActualizacion': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -145,7 +189,18 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
           'fechaAgregado': FieldValue.serverTimestamp(),
           'descripcion': 'Añadido a favoritos',
           'estado': 'favorito',
+          'tiempoJugado': 0,
+          'nombre': _game!.title, // Campo adicional para compatibilidad
+          'imagenUrl': _game!.coverImage, // Campo adicional para compatibilidad
+          'rating': _game!.rating,
         };
+        
+        // Asegurarnos que el documento del usuario existe
+        await _firestore.collection('usuarios').doc(currentUser.uid).set({
+          'uid': currentUser.uid,
+          'email': currentUser.email,
+          'ultimaActualizacion': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true));
         
         // Agregar a colección de juegos del usuario
         await _firestore
@@ -155,12 +210,105 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
             .doc(_game!.id)
             .set(juegoData);
         
-        // Actualizar estadísticas generales del usuario
-        await _firestore.collection('usuarios').doc(currentUser.uid).update({
-          'stats.totalJuegos': FieldValue.increment(1),
-          'stats.totalFavoritos': FieldValue.increment(1),
-          'ultimaActualizacion': FieldValue.serverTimestamp(),
-        });
+        // Agregar el juego a la lista "favoritos" en el documento principal del usuario
+        try {
+          // Comprobar si el usuario ya tiene una estructura de listas
+          final userDoc = await _firestore.collection('usuarios').doc(currentUser.uid).get();
+          
+          if (userDoc.exists) {
+            final userData = userDoc.data() as Map<String, dynamic>;
+            List<dynamic> listas = List.from(userData['listas'] ?? []);
+            
+            // Buscar si existe la lista "favoritos"
+            int favoritosIndex = listas.indexWhere((lista) => lista['id'] == 'favoritos');
+            
+            // Si no existe la lista de favoritos, la creamos
+            if (favoritosIndex == -1) {
+              listas.add({
+                'id': 'favoritos',
+                'nombre': 'Favoritos',
+                'descripcion': 'Mis juegos favoritos',
+                'juegos': [],
+              });
+              favoritosIndex = listas.length - 1;
+            }
+            
+            // Aseguramos que la lista tenga un array de juegos
+            if (!listas[favoritosIndex].containsKey('juegos')) {
+              listas[favoritosIndex]['juegos'] = [];
+            }
+            
+            // Verificar si el juego ya existe en la lista
+            List<dynamic> juegos = List.from(listas[favoritosIndex]['juegos']);
+            if (!juegos.any((juego) => juego['id'] == _game!.id)) {
+              // Agregar el juego a la lista
+              juegos.add({
+                'id': _game!.id,
+                'nombre': _game!.title,
+                'imagen': _game!.coverImage,
+                'imagenUrl': _game!.coverImage,
+                'fechaAgregado': FieldValue.serverTimestamp(),
+                'estado': 'favorito',
+                'rating': _game!.rating,
+                'tiempoJugado': 0,
+              });
+              
+              listas[favoritosIndex]['juegos'] = juegos;
+              
+              // Actualizar el documento con los cambios
+              await _firestore.collection('usuarios').doc(currentUser.uid).update({
+                'listas': listas,
+              });
+            }
+          } else {
+            // Crear el documento con una estructura inicial
+            await _firestore.collection('usuarios').doc(currentUser.uid).set({
+              'uid': currentUser.uid,
+              'email': currentUser.email,
+              'listas': [
+                {
+                  'id': 'favoritos',
+                  'nombre': 'Favoritos',
+                  'descripcion': 'Mis juegos favoritos',
+                  'juegos': [
+                    {
+                      'id': _game!.id,
+                      'nombre': _game!.title,
+                      'imagen': _game!.coverImage,
+                      'imagenUrl': _game!.coverImage,
+                      'fechaAgregado': FieldValue.serverTimestamp(),
+                      'estado': 'favorito',
+                      'rating': _game!.rating,
+                      'tiempoJugado': 0,
+                    }
+                  ],
+                }
+              ],
+              'ultimaActualizacion': FieldValue.serverTimestamp(),
+            }, SetOptions(merge: true));
+          }
+        } catch (listError) {
+          print('Error al actualizar la lista de favoritos: $listError');
+        }
+        
+        // Intentar actualizar estadísticas (podría fallar si el documento no existe)
+        try {
+          await _firestore.collection('usuarios').doc(currentUser.uid).update({
+            'stats.totalJuegos': FieldValue.increment(1),
+            'stats.totalFavoritos': FieldValue.increment(1),
+            'ultimaActualizacion': FieldValue.serverTimestamp(),
+          });
+        } catch (statsError) {
+          print('Error al actualizar estadísticas: $statsError');
+          // Crear documento de estadísticas si no existe
+          await _firestore.collection('usuarios').doc(currentUser.uid).set({
+            'stats': {
+              'totalJuegos': 1,
+              'totalFavoritos': 1,
+            },
+            'ultimaActualizacion': FieldValue.serverTimestamp(),
+          }, SetOptions(merge: true));
+        }
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -174,9 +322,21 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
         });
       }
     } catch (e) {
+      String errorMessage = 'Error desconocido';
+      
+      if (e.toString().contains('permission-denied')) {
+        errorMessage = 'No tienes permisos para realizar esta acción. Comprueba las reglas de seguridad.';
+      } else if (e.toString().contains('not-found')) {
+        errorMessage = 'No se encontró el documento del usuario. Intenta cerrar sesión y volver a iniciarla.';
+      } else if (e.toString().contains('network')) {
+        errorMessage = 'Error de red. Verifica tu conexión a internet.';
+      } else {
+        errorMessage = 'Error: ${e.toString()}';
+      }
+      
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: Text(errorMessage),
           backgroundColor: Colors.red,
         ),
       );
