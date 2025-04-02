@@ -242,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
-                        'O continúa con',
+                        'Información legal',
                         style: GoogleFonts.inter(
                           color: AppTheme.secondaryLight.withOpacity(0.7),
                         ),
@@ -253,24 +253,121 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 SizedBox(height: screenHeight * 0.02),
 
-                // Botones de redes sociales
+                // Enlaces a términos y política de privacidad
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _socialLoginButton(
+                    TextButton(
                       onPressed: () {
-                        // TODO: Implementar login con Google
+                        // Mostrar diálogo con términos y condiciones
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: AppTheme.primaryDark,
+                              title: Text(
+                                'Términos y Condiciones',
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.secondaryLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              content: SingleChildScrollView(
+                                child: Text(
+                                  'Al utilizar Trakr, aceptas los siguientes términos:\n\n'
+                                  '1. Trakr es una plataforma para seguimiento de videojuegos.\n\n'
+                                  '2. Los usuarios son responsables de la información que comparten.\n\n'
+                                  '3. Está prohibido el uso de contenido ofensivo o inapropiado.\n\n'
+                                  '4. Nos reservamos el derecho de suspender cuentas que violen estos términos.\n\n'
+                                  '5. Trakr puede modificar estos términos en cualquier momento, notificando a los usuarios de cambios significativos.\n\n'
+                                  '6. El contenido generado por los usuarios es propiedad de Trakr mientras permanezca en la plataforma.\n\n'
+                                  '7. Los usuarios conceden a Trakr el derecho de usar, modificar y distribuir el contenido que publican.\n\n'
+                                  '8. Trakr no se hace responsable por interrupciones temporales del servicio.\n\n'
+                                  '9. El uso de la aplicación implica la aceptación de estos términos.',
+                                  style: GoogleFonts.inter(
+                                    color: AppTheme.secondaryLight.withOpacity(0.9),
+                                  ),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(
+                                    'Cerrar',
+                                    style: GoogleFonts.inter(
+                                      color: AppTheme.accentBlue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       },
-                      icon: 'assets/icons/google.png',
-                      label: 'Google',
+                      child: Text(
+                        'Términos y Condiciones',
+                        style: GoogleFonts.inter(
+                          color: AppTheme.accentBlue,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 16),
-                    _socialLoginButton(
-                onPressed: () {
-                        // TODO: Implementar login con Facebook
+                    TextButton(
+                      onPressed: () {
+                        // Mostrar diálogo con política de privacidad
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              backgroundColor: AppTheme.primaryDark,
+                              title: Text(
+                                'Política de Privacidad',
+                                style: GoogleFonts.inter(
+                                  color: AppTheme.secondaryLight,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              content: SingleChildScrollView(
+                                child: Text(
+                                  'Protección de datos en Trakr:\n\n'
+                                  '1. Recopilamos información básica como tu correo electrónico, nombre de usuario y preferencias de juegos.\n\n'
+                                  '2. Usamos cookies para mejorar tu experiencia y personalizar el contenido.\n\n'
+                                  '3. No compartimos tu información personal con terceros sin tu consentimiento.\n\n'
+                                  '4. Tus datos de juego se almacenan de forma segura en nuestros servidores.\n\n'
+                                  '5. Puedes solicitar la eliminación de tu cuenta y datos en cualquier momento.\n\n'
+                                  '6. Utilizamos cifrado para proteger tus datos personales.\n\n'
+                                  '7. Las actualizaciones de esta política serán notificadas a través de la aplicación.\n\n'
+                                  '8. Puedes contactarnos en privacy@trakr.com para cualquier consulta sobre privacidad.',
+                                  style: GoogleFonts.inter(
+                                    color: AppTheme.secondaryLight.withOpacity(0.9),
+                                  ),
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text(
+                                    'Cerrar',
+                                    style: GoogleFonts.inter(
+                                      color: AppTheme.accentBlue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        );
                       },
-                      icon: 'assets/icons/facebook.png',
-                      label: 'Facebook',
+                      child: Text(
+                        'Política de Privacidad',
+                        style: GoogleFonts.inter(
+                          color: AppTheme.accentBlue,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -310,32 +407,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _socialLoginButton({
-    required VoidCallback onPressed,
-    required String icon,
-    required String label,
-  }) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: AppTheme.cardColor,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: AppTheme.accentBlue.withOpacity(0.5)),
-        ),
-      ),
-      icon: Image.asset(icon, height: 24),
-      label: Text(
-        label,
-        style: GoogleFonts.inter(
-          color: AppTheme.secondaryLight,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );
