@@ -25,6 +25,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
   Game? _game;
   bool _isLoading = true;
   bool _isAddingToProfile = false;
+  bool _isInFavorites = false;
   String? _error;
   
   // Lista de listas disponibles
@@ -34,6 +35,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
   final UserService _userService = UserService();
   final ApiService _apiService = ApiService();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -54,6 +56,9 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
         _game = game;
         _isLoading = false;
       });
+      
+      // Verificar si el juego ya está en favoritos
+      _verificarSiEstaEnFavoritos();
     } catch (e) {
       setState(() {
         _error = 'Error al cargar los detalles del juego: $e';
@@ -62,15 +67,35 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
       print('Error al cargar los detalles del juego: $e');
     }
   }
+  
+  Future<void> _verificarSiEstaEnFavoritos() async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null || _game == null) return;
+    
+    try {
+      final docSnapshot = await _firestore
+          .collection('usuarios')
+          .doc(currentUser.uid)
+          .collection('juegos')
+          .doc(_game!.id)
+          .get();
+      
+      setState(() {
+        _isInFavorites = docSnapshot.exists;
+      });
+    } catch (e) {
+      print('Error al verificar si el juego está en favoritos: $e');
+    }
+  }
 
-  Future<void> _agregarJuegoAPerfil(String listaId) async {
+  Future<void> _agregarJuegoAFavoritos() async {
     if (_game == null) return;
     
     final currentUser = _auth.currentUser;
     if (currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Debes iniciar sesión para añadir juegos a tu perfil'),
+          content: Text('Debes iniciar sesión para añadir juegos a favoritos'),
           backgroundColor: Colors.red,
         ),
       );
@@ -82,81 +107,85 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
     });
     
     try {
-      final juegoData = {
-        'id': _game!.id,
-        'titulo': _game!.title,
-        'imagen': _game!.coverImage,
-        'genero': _game!.genre,
-        'plataforma': _game!.platform,
-        'valoracion': _game!.rating,
-        'fechaAgregado': FieldValue.serverTimestamp(),
-      };
-      
-      await _userService.agregarJuegoALista(
-        currentUser.uid,
-        listaId,
-        juegoData,
-      );
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Juego añadido a tu lista de $listaId'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // Si ya está en favoritos, lo quitamos
+      if (_isInFavorites) {
+        await _firestore
+            .collection('usuarios')
+            .doc(currentUser.uid)
+            .collection('juegos')
+            .doc(_game!.id)
+            .delete();
+        
+        // Actualizar estadísticas
+        await _firestore.collection('usuarios').doc(currentUser.uid).update({
+          'stats.totalJuegos': FieldValue.increment(-1),
+          'stats.totalFavoritos': FieldValue.increment(-1),
+          'ultimaActualizacion': FieldValue.serverTimestamp(),
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Juego eliminado de favoritos'),
+            backgroundColor: Colors.blue,
+          ),
+        );
+        
+        setState(() {
+          _isInFavorites = false;
+        });
+      } else {
+        // Si no está en favoritos, lo agregamos
+        final juegoData = {
+          'id': _game!.id,
+          'titulo': _game!.title,
+          'imagen': _game!.coverImage,
+          'genero': _game!.genre,
+          'plataforma': _game!.platform,
+          'valoracion': _game!.rating,
+          'fechaAgregado': FieldValue.serverTimestamp(),
+          'descripcion': 'Añadido a favoritos',
+          'estado': 'favorito',
+        };
+        
+        // Agregar a colección de juegos del usuario
+        await _firestore
+            .collection('usuarios')
+            .doc(currentUser.uid)
+            .collection('juegos')
+            .doc(_game!.id)
+            .set(juegoData);
+        
+        // Actualizar estadísticas generales del usuario
+        await _firestore.collection('usuarios').doc(currentUser.uid).update({
+          'stats.totalJuegos': FieldValue.increment(1),
+          'stats.totalFavoritos': FieldValue.increment(1),
+          'ultimaActualizacion': FieldValue.serverTimestamp(),
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Juego añadido a favoritos'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        
+        setState(() {
+          _isInFavorites = true;
+        });
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al añadir el juego: $e'),
+          content: Text('Error: $e'),
           backgroundColor: Colors.red,
         ),
       );
-      print('Error al añadir juego: $e');
+      print('Error al modificar favoritos: $e');
     } finally {
       setState(() {
         _isAddingToProfile = false;
       });
     }
-  }
-
-  void _mostrarDialogoSeleccionLista() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppTheme.primaryDark,
-        title: const Text(
-          'Añadir a lista',
-          style: TextStyle(color: Colors.white),
-        ),
-        content: SizedBox(
-          width: double.minPositive,
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: _listas.length,
-            itemBuilder: (context, index) {
-              return ListTile(
-                title: Text(
-                  _listas[index],
-                  style: const TextStyle(color: Colors.white),
-                ),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _agregarJuegoAPerfil(_listas[index].toLowerCase());
-                },
-              );
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            child: const Text('Cancelar'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -174,12 +203,14 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
               : _buildGameDetails(),
       floatingActionButton: !_isLoading && _error == null && _game != null
           ? FloatingActionButton.extended(
-              onPressed: _isAddingToProfile ? null : _mostrarDialogoSeleccionLista,
-              backgroundColor: AppTheme.accent,
+              onPressed: _isAddingToProfile ? null : _agregarJuegoAFavoritos,
+              backgroundColor: _isInFavorites ? Colors.red : AppTheme.accent,
               icon: _isAddingToProfile
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Icon(Icons.add),
-              label: Text(_isAddingToProfile ? 'Añadiendo...' : 'Añadir a perfil'),
+                  : Icon(_isInFavorites ? Icons.favorite : Icons.favorite_border),
+              label: Text(_isAddingToProfile 
+                  ? 'Procesando...' 
+                  : (_isInFavorites ? 'Quitar de favoritos' : 'Añadir a favoritos')),
             )
           : null,
     );
