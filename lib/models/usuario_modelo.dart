@@ -34,10 +34,10 @@ class UsuarioModelo {
     this.logrosDesbloqueados = 0,
     this.totalHorasJugadas = 0,
   }) : 
-    this.seguidores = seguidores ?? [],
-    this.siguiendo = siguiendo ?? [],
-    this.juegosRecientes = juegosRecientes ?? [],
-    this.listas = listas ?? [];
+    seguidores = seguidores ?? [],
+    siguiendo = siguiendo ?? [],
+    juegosRecientes = juegosRecientes ?? [],
+    listas = listas ?? [];
 
   factory UsuarioModelo.fromMap(Map<String, dynamic> map) {
     final DateTime fechaRegistro = map['fechaRegistro'] is Timestamp
@@ -142,7 +142,7 @@ class GameList {
     required this.esPrivada,
     required this.fechaCreacion,
     List<GameInList>? juegos,
-  }) : this.juegos = juegos ?? [];
+  }) : juegos = juegos ?? [];
 
   factory GameList.fromMap(Map<String, dynamic> map) {
     final DateTime fechaCreacion = map['fechaCreacion'] is Timestamp

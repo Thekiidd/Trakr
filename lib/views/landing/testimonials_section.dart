@@ -130,7 +130,7 @@ class _TestimonialCard extends StatelessWidget {
           Row(
             children: List.generate(
               rating,
-              (index) => Icon(
+              (index) => const Icon(
                 Icons.star,
                 color: Colors.amber,
                 size: 16,

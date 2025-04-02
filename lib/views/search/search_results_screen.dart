@@ -43,7 +43,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
         ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.secondaryLight),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.secondaryLight),
           onPressed: () => context.go('/'),
         ),
       ),
@@ -55,7 +55,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           future: _gamesFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(color: AppTheme.accentBlue),
               );
             }
@@ -132,14 +132,14 @@ class GameResultCard extends StatelessWidget {
             children: [
               game.coverImage != null
                   ? CircleAvatar(
-                      backgroundImage: NetworkImage(game.coverImage!),
+                      backgroundImage: NetworkImage(game.coverImage),
                       radius: isMobile ? 20 : 25,
                       backgroundColor: Colors.grey, // Fallback si la imagen falla
                     )
                   : CircleAvatar(
                       backgroundColor: Colors.grey,
                       radius: isMobile ? 20 : 25,
-                      child: Icon(Icons.gamepad, color: Colors.white),
+                      child: const Icon(Icons.gamepad, color: Colors.white),
                     ),
               SizedBox(width: screenWidth * 0.02),
               Expanded(
@@ -158,7 +158,7 @@ class GameResultCard extends StatelessWidget {
                     ),
                     if (game.rating != null)
                       Text(
-                        'Rating: ${game.rating!.toStringAsFixed(1)}/5',
+                        'Rating: ${game.rating.toStringAsFixed(1)}/5',
                         style: GoogleFonts.inter(
                           color: AppTheme.secondaryLight.withAlpha(179), // Blanco opaco 0.7
                           fontSize: isMobile ? 14 : 16,

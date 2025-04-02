@@ -12,7 +12,9 @@ class AppTheme {
   static const Color gradientStart = Color(0xFF3B82F6); // Inicio del gradiente (azul)
   static const Color gradientEnd = Color(0xFF1E1E1E);
 
-  static var cardColor; // Fin del gradiente (gris oscuro)
+  static var cardColor;
+
+  static var accent; // Fin del gradiente (gris oscuro)
 
   static ThemeData get darkTheme {
     return ThemeData(
@@ -21,7 +23,7 @@ class AppTheme {
       primaryColor: accentBlue, // Azul para gradientes, no botones
       hintColor: accentGreen, // Verde para hints y detalles secundarios
       canvasColor: primaryDark, // Fondo para elementos como diálogos
-      cardColor: Color(0xFF1E1E1E), // Fondo para tarjetas, ligeramente más claro
+      cardColor: const Color(0xFF1E1E1E), // Fondo para tarjetas, ligeramente más claro
       dividerColor: Colors.white.withAlpha(61), // Divisores suaves en blanco traslúcido (0.24 * 255)
       textTheme: GoogleFonts.interTextTheme().apply(
         bodyColor: secondaryLight, // Texto blanco principal en fondos oscuros
@@ -83,7 +85,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12), // Bordes más suaves
           ),
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -93,13 +95,13 @@ class AppTheme {
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),
-          padding: EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           overlayColor: secondaryLight.withAlpha(25), // Efecto hover sutil (0.1 * 255)
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: Color(0xFF1E1E1E), // Fondo gris oscuro para campos de texto
+        fillColor: const Color(0xFF1E1E1E), // Fondo gris oscuro para campos de texto
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -114,7 +116,7 @@ class AppTheme {
         ),
       ),
       cardTheme: CardTheme(
-        color: Color(0xFF1E1E1E), // Fondo para tarjetas
+        color: const Color(0xFF1E1E1E), // Fondo para tarjetas
         elevation: 0, // Sin sombra para un look limpio
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(0), // Sin bordes redondeados
@@ -131,7 +133,7 @@ class AppTheme {
   // Método opcional para crear un gradiente común
   static BoxDecoration getGradientDecoration({BorderRadius? borderRadius}) {
     return BoxDecoration(
-      gradient: LinearGradient(
+      gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: [gradientStart, gradientEnd],
@@ -142,7 +144,7 @@ class AppTheme {
 
   // Método para el gradiente global de la web
   static BoxDecoration getGlobalBackgroundGradient() {
-    return BoxDecoration(
+    return const BoxDecoration(
       gradient: LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,

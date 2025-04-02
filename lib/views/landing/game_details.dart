@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:trakr_def/core/theme/app_theme.dart';
 import '../../models/game.dart';
 import 'package:trakr_def/services/api_service.dart';
-import 'package:go_router/go_router.dart';
 import '../../widgets/custom_app_bar.dart';
 
 class GameDetailsScreen extends StatefulWidget {
@@ -29,7 +28,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
   Future<Game> _loadGameDetails() async {
     try {
       // Intentar cargar desde la API
-      return await ApiService().fetchGameById(widget.gameId);
+      return await ApiService().fetchGameById(widget.gameId as String);
     } catch (e) {
       print('Error al cargar datos del juego: $e');
       
@@ -88,7 +87,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
         future: _gameFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(color: AppTheme.accentBlue),
             );
           }
@@ -97,7 +96,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.error_outline,
                     color: Colors.red,
                     size: 48,

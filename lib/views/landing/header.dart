@@ -72,7 +72,7 @@ class _HeaderState extends State<Header> {
                       onTap: () => context.go('/'),
                       child: Row(
                         children: [
-                          Icon(Icons.gamepad, color: AppTheme.accentBlue, size: 24),
+                          const Icon(Icons.gamepad, color: AppTheme.accentBlue, size: 24),
                           const SizedBox(width: 8),
                           Text(
                             'TRAKR',
@@ -225,15 +225,15 @@ class _HeaderState extends State<Header> {
     final isLoggedIn = context.watch<AuthViewModel>().currentUser != null;
     
     // Función para navegar y cerrar menú
-    void _navigateTo(String route) {
+    void navigateTo(String route) {
       context.go(route);
       setState(() => _isMenuOpen = false);
     }
     
     // Función para verificar autenticación
-    void _checkAuthAndNavigate(String route, String section) {
+    void checkAuthAndNavigate(String route, String section) {
       if (isLoggedIn) {
-        _navigateTo(route);
+        navigateTo(route);
       } else {
         setState(() => _isMenuOpen = false);
         _showAuthRequiredDialog(context, section);
@@ -267,19 +267,19 @@ class _HeaderState extends State<Header> {
             _buildMobileMenuItem(
               icon: Icons.home,
               title: 'Inicio',
-              onTap: () => _navigateTo('/'),
+              onTap: () => navigateTo('/'),
             ),
             
             _buildMobileMenuItem(
               icon: Icons.games,
               title: 'Juegos',
-              onTap: () => _checkAuthAndNavigate('/games', 'juegos'),
+              onTap: () => checkAuthAndNavigate('/games', 'juegos'),
             ),
             
             _buildMobileMenuItem(
               icon: Icons.forum,
               title: 'Foro',
-              onTap: () => _checkAuthAndNavigate('/forum', 'foro'),
+              onTap: () => checkAuthAndNavigate('/forum', 'foro'),
             ),
             
             // Botón de inicio de sesión/cierre de sesión
@@ -315,7 +315,7 @@ class _HeaderState extends State<Header> {
                       );
                     } else {
                       // Iniciar sesión
-                      _navigateTo('/login');
+                      navigateTo('/login');
                     }
                   },
                   icon: Icon(isLoggedIn ? Icons.logout : Icons.login, size: 18),
@@ -403,7 +403,7 @@ class _HeaderState extends State<Header> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.lock,
               color: AppTheme.accentBlue,
               size: 48,
@@ -437,7 +437,7 @@ class _HeaderState extends State<Header> {
               backgroundColor: AppTheme.accentBlue,
               foregroundColor: Colors.white,
             ),
-            child: Text('Iniciar Sesión'),
+            child: const Text('Iniciar Sesión'),
           ),
         ],
       ),

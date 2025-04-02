@@ -33,9 +33,9 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
               side: const BorderSide(color: Colors.white24),
             ),
             itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'profile',
-                child: const ListTile(
+                child: ListTile(
                   leading: Icon(Icons.person, color: Colors.white),
                   title: Text(
                     'Mi Perfil',
@@ -44,9 +44,9 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                 ),
               ),
               const PopupMenuDivider(),
-              PopupMenuItem<String>(
+              const PopupMenuItem<String>(
                 value: 'logout',
-                child: const ListTile(
+                child: ListTile(
                   leading: Icon(Icons.logout, color: Colors.red),
                   title: Text(
                     'Cerrar Sesión',

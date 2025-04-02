@@ -58,7 +58,7 @@ class PopularGamesSection extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(width: 4),
-                      Icon(Icons.arrow_forward, size: 16),
+                      const Icon(Icons.arrow_forward, size: 16),
                     ],
                   ),
                 ),
@@ -220,7 +220,7 @@ class _GameCard extends StatelessWidget {
                     // Calificación
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.star,
                           color: Colors.amber,
                           size: 16,

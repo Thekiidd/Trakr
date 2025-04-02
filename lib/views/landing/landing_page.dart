@@ -10,7 +10,6 @@ import 'footer_section.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../viewmodels/auth_viewmodel.dart';
-import '../../widgets/custom_app_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LandingPage extends StatelessWidget {
@@ -92,9 +91,9 @@ class LandingPage extends StatelessWidget {
                     _buildCtaSection(context),
                   
                   // Footer Section con control de overflows
-                  SizedBox(
+                  const SizedBox(
                     width: double.infinity,
-                    child: const FooterSection(),
+                    child: FooterSection(),
                   ),
                 ],
               ),

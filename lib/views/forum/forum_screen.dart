@@ -7,6 +7,7 @@ import '../../services/forum_service.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../widgets/forum_post_card.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'forum_post_detail_screen.dart';
 
 class ForumScreen extends StatefulWidget {
   const ForumScreen({super.key});
@@ -16,63 +17,50 @@ class ForumScreen extends StatefulWidget {
 }
 
 class _ForumScreenState extends State<ForumScreen> {
-  List<ForumPost> _posts = [];
-  bool _isLoading = false;
+  final bool _isLoading = false;
   DocumentSnapshot? _lastDocument;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPosts();
-  }
-
-  Future<void> _loadPosts() async {
-    if (_isLoading) return;
-    
-    setState(() => _isLoading = true);
-    try {
-      final forumService = Provider.of<ForumService>(context, listen: false);
-      final newPosts = await forumService.getPosts(
-        startAfter: _lastDocument,
-      );
-      setState(() {
-        _posts.addAll(newPosts);
-        if (newPosts.isNotEmpty) {
-          _lastDocument = newPosts.last as DocumentSnapshot;
-        }
-      });
-    } finally {
-      setState(() => _isLoading = false);
-    }
-  }
+  int _limit = 10; // Número de posts a cargar inicialmente
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.primaryDark,
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'Foro',
         backRoute: '/',
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          setState(() {
-            _posts.clear();
-            _lastDocument = null;
-          });
-          await _loadPosts();
-        },
-        child: _posts.isEmpty && !_isLoading
-            ? Center(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('forum_posts')
+            .orderBy('createdAt', descending: true)
+            .limit(_limit)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting && !snapshot.hasData) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Error al cargar publicaciones: ${snapshot.error}',
+                style: const TextStyle(color: Colors.white),
+              ),
+            );
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+          if (docs.isEmpty) {
+            return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.forum,
                       size: 64,
                       color: AppTheme.accentBlue,
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
                       'No hay publicaciones',
                       style: GoogleFonts.inter(
@@ -81,7 +69,7 @@ class _ForumScreenState extends State<ForumScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       '¡Sé el primero en publicar!',
                       style: GoogleFonts.inter(
@@ -91,21 +79,45 @@ class _ForumScreenState extends State<ForumScreen> {
                     ),
                   ],
                 ),
-              )
-            : ListView.builder(
-                itemCount: _posts.length + (_isLoading ? 1 : 0),
+            );
+          }
+
+          // Guardar el último documento para paginación
+          if (docs.isNotEmpty) {
+            _lastDocument = docs.last;
+          }
+
+          // Convertir los documentos a objetos ForumPost
+          final posts = docs.map((doc) => ForumPost.fromFirestore(doc)).toList();
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              setState(() {
+                _limit = 10; // Reiniciar a la cantidad inicial
+              });
+            },
+            child: ListView.builder(
+              itemCount: posts.length + 1, // +1 para el botón de cargar más
                 itemBuilder: (context, index) {
-                  if (index == _posts.length) {
+                if (index == posts.length) {
                     return _buildLoadMoreButton();
                   }
                   return ForumPostCard(
-                    post: _posts[index],
+                  post: posts[index],
                     onTap: () {
-                      // TODO: Navegar a la vista de detalle del post
+                    // Navegar a la vista de detalle del post
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForumPostDetailScreen(postId: posts[index].id),
+                      ),
+                    );
                     },
                   );
                 },
               ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _showCreatePostDialog,
@@ -124,15 +136,34 @@ class _ForumScreenState extends State<ForumScreen> {
         ),
       );
     }
-    return TextButton(
-      onPressed: _loadPosts,
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: TextButton(
+          onPressed: _loadMorePosts,
+          style: TextButton.styleFrom(
+            foregroundColor: AppTheme.accentBlue,
+            backgroundColor: AppTheme.accentBlue.withOpacity(0.1),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
       child: Text(
         'Cargar más publicaciones',
         style: GoogleFonts.inter(
-          color: AppTheme.accentBlue,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ),
       ),
     );
+  }
+
+  void _loadMorePosts() {
+    setState(() {
+      _limit += 10; // Incrementar el límite para cargar más posts
+    });
   }
 
   void _showCreatePostDialog() {
@@ -159,7 +190,7 @@ class _ForumScreenState extends State<ForumScreen> {
               ),
               content: Container(
                 width: double.maxFinite,
-                constraints: BoxConstraints(maxHeight: 400),
+                constraints: const BoxConstraints(maxHeight: 400),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -170,15 +201,15 @@ class _ForumScreenState extends State<ForumScreen> {
                       decoration: InputDecoration(
                         labelText: 'Título',
                         labelStyle: GoogleFonts.inter(color: Colors.white70),
-                        enabledBorder: UnderlineInputBorder(
+                        enabledBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.white70),
                         ),
-                        focusedBorder: UnderlineInputBorder(
+                        focusedBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: AppTheme.accentBlue),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     
                     // Contenido del post
                     Expanded(
@@ -191,10 +222,10 @@ class _ForumScreenState extends State<ForumScreen> {
                           labelText: 'Contenido',
                           alignLabelWithHint: true,
                           labelStyle: GoogleFonts.inter(color: Colors.white70),
-                          enabledBorder: OutlineInputBorder(
+                          enabledBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: Colors.white70),
                           ),
-                          focusedBorder: OutlineInputBorder(
+                          focusedBorder: const OutlineInputBorder(
                             borderSide: BorderSide(color: AppTheme.accentBlue),
                           ),
                         ),
@@ -224,14 +255,14 @@ class _ForumScreenState extends State<ForumScreen> {
                       // Validar campos
                       if (titleController.text.trim().isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('El título es obligatorio')),
+                          const SnackBar(content: Text('El título es obligatorio')),
                         );
                         return;
                       }
                       
                       if (contentController.text.trim().isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('El contenido es obligatorio')),
+                          const SnackBar(content: Text('El contenido es obligatorio')),
                         );
                         return;
                       }
@@ -247,47 +278,36 @@ class _ForumScreenState extends State<ForumScreen> {
                         final authorName = await forumService.getCurrentUsername() ?? 'Usuario Anónimo';
                         
                         // Crear objeto de post
+                        final now = DateTime.now();
                         final newPost = ForumPost(
-                          id: '',  // Se asignará por Firestore
+                          id: '',  // Se asignará en Firestore
                           userId: userId,
                           title: titleController.text.trim(),
                           content: contentController.text.trim(),
-                          gameId: '',  // Campo requerido, se puede dejar vacío por ahora
+                          gameId: '',  // Sin juego asociado
+                          createdAt: now,
+                          updatedAt: now,
                           authorName: authorName,
-                          createdAt: DateTime.now(),
-                          updatedAt: DateTime.now(),  // Campo requerido que faltaba
-                          likes: 0,
-                          comments: 0,
-                          isPinned: false,
-                          likedBy: [],
                         );
                         
-                        // Crear post en Firestore
-                        final String? postId = await forumService.createPost(newPost);
+                        // Guardar post en Firestore
+                        await forumService.createPost(newPost);
                         
-                        if (postId != null) {
-                          // Cerrar diálogo
+                        // Cerrar el diálogo
+                        if (context.mounted) {
                           Navigator.pop(context);
-                          
-                          // Actualizar lista de posts
-                          setState(() {
-                            _posts.clear();
-                            _lastDocument = null;
-                          });
-                          await _loadPosts();
                           
                           // Mostrar mensaje de éxito
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('¡Publicación creada con éxito!'),
+                            const SnackBar(
+                              content: Text('Publicación creada correctamente'),
                               backgroundColor: Colors.green,
                             ),
                           );
-                        } else {
-                          throw Exception('No se pudo crear la publicación');
                         }
                       } catch (e) {
-                        // Mostrar error
+                        // Mostrar mensaje de error
+                        if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                             content: Text('Error al crear la publicación: $e'),
@@ -299,27 +319,29 @@ class _ForumScreenState extends State<ForumScreen> {
                         setState(() {
                           isPosting = false;
                         });
+                        }
                       }
                     },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentBlue,
                     foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppTheme.accentBlue.withOpacity(0.3),
+                    disabledBackgroundColor: AppTheme.accentBlue.withOpacity(0.5),
+                    disabledForegroundColor: Colors.white.withOpacity(0.5),
                   ),
                   child: isPosting
-                    ? SizedBox(
+                    ? const SizedBox(
                         width: 20,
                         height: 20,
                         child: CircularProgressIndicator(
-                          strokeWidth: 3,
                           color: Colors.white,
+                          strokeWidth: 2,
                         ),
                       )
-                    : Text('Publicar'),
+                    : const Text('Publicar'),
                 ),
               ],
             );
-          }
+          },
         );
       },
     );

@@ -178,11 +178,20 @@ class ForumService {
   // Dar like a un post
   Future<bool> likePost(String postId, String userId) async {
     try {
+      // Verificar que el usuario esté autenticado
+      if (_auth.currentUser == null) {
+        print('Error: Usuario no autenticado');
+        return false;
+      }
+
       final postRef = _firestore.collection('forum_posts').doc(postId);
       
       await _firestore.runTransaction((transaction) async {
         final postDoc = await transaction.get(postRef);
-        if (!postDoc.exists) return;
+        if (!postDoc.exists) {
+          print('Error: Post no encontrado');
+          return;
+        }
 
         final post = ForumPost.fromFirestore(postDoc);
         if (post.likedBy.contains(userId)) {
@@ -190,19 +199,25 @@ class ForumService {
           transaction.update(postRef, {
             'likes': FieldValue.increment(-1),
             'likedBy': FieldValue.arrayRemove([userId]),
+            'likeCount': FieldValue.increment(-1),
           });
         } else {
           // Agregar like
           transaction.update(postRef, {
             'likes': FieldValue.increment(1),
             'likedBy': FieldValue.arrayUnion([userId]),
+            'likeCount': FieldValue.increment(1),
           });
         }
       });
 
       return true;
     } catch (e) {
-      print('Error al dar like al post: $e');
+      if (e.toString().contains('permission-denied')) {
+        print('Error de permisos: El usuario no tiene permisos para dar like a este post');
+      } else {
+        print('Error al dar like al post: $e');
+      }
       return false;
     }
   }
@@ -210,11 +225,20 @@ class ForumService {
   // Dar like a un comentario
   Future<bool> likeComment(String commentId, String userId) async {
     try {
+      // Verificar que el usuario esté autenticado
+      if (_auth.currentUser == null) {
+        print('Error: Usuario no autenticado');
+        return false;
+      }
+
       final commentRef = _firestore.collection('forum_comments').doc(commentId);
       
       await _firestore.runTransaction((transaction) async {
         final commentDoc = await transaction.get(commentRef);
-        if (!commentDoc.exists) return;
+        if (!commentDoc.exists) {
+          print('Error: Comentario no encontrado');
+          return;
+        }
 
         final comment = ForumComment.fromFirestore(commentDoc);
         if (comment.likedBy.contains(userId)) {
@@ -234,7 +258,11 @@ class ForumService {
 
       return true;
     } catch (e) {
-      print('Error al dar like al comentario: $e');
+      if (e.toString().contains('permission-denied')) {
+        print('Error de permisos: El usuario no tiene permisos para dar like a este comentario');
+      } else {
+        print('Error al dar like al comentario: $e');
+      }
       return false;
     }
   }

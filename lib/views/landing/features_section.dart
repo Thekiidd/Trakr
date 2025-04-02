@@ -88,37 +88,37 @@ class FeaturesSection extends StatelessWidget {
   
   List<Widget> _buildFeaturesList() {
     return [
-      _FeatureCard(
+      const _FeatureCard(
         icon: Icons.games,
         title: 'Biblioteca Personal',
         description: 'Organiza y gestiona tu colección de juegos de manera eficiente.',
         color: AppTheme.accentBlue,
       ),
-      _FeatureCard(
+      const _FeatureCard(
         icon: Icons.trending_up,
         title: 'Seguimiento de Progreso',
         description: 'Registra tus horas de juego y sigue tu evolución.',
         color: AppTheme.accentGreen,
       ),
-      _FeatureCard(
+      const _FeatureCard(
         icon: Icons.people,
         title: 'Comunidad Activa',
         description: 'Conecta con otros jugadores y comparte experiencias.',
         color: Colors.purple,
       ),
-      _FeatureCard(
+      const _FeatureCard(
         icon: Icons.notifications,
         title: 'Notificaciones',
         description: 'Mantente al día con las novedades de tus juegos favoritos.',
         color: Colors.orange,
       ),
-      _FeatureCard(
+      const _FeatureCard(
         icon: Icons.analytics,
         title: 'Estadísticas Detalladas',
         description: 'Analiza tus hábitos de juego y optimiza tu tiempo.',
         color: Colors.teal,
       ),
-      _FeatureCard(
+      const _FeatureCard(
         icon: Icons.star,
         title: 'Recomendaciones',
         description: 'Descubre nuevos juegos basados en tus gustos y preferencias.',

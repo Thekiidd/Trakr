@@ -9,8 +9,8 @@ class UserViewModel extends ChangeNotifier {
   UsuarioModelo? _usuario;
   bool _isLoading = false;
   String? _errorMessage;
-  FirebaseAuth _auth = FirebaseAuth.instance;
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Getters
   UsuarioModelo? get usuario => _usuario;

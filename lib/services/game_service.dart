@@ -54,7 +54,7 @@ class GameService {
       final querySnapshot = await _firestore
           .collection('games')
           .where('title', isGreaterThanOrEqualTo: query)
-          .where('title', isLessThanOrEqualTo: query + '\uf8ff')
+          .where('title', isLessThanOrEqualTo: '$query\uf8ff')
           .limit(20)
           .get();
 

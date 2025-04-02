@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:html' if (dart.library.html) 'dart:html' as html; // Para web
-import 'widgets/status_message.dart';
+// Para web
 import 'views/games/games_screen.dart';
 import 'views/landing/game_details.dart' show GameDetailsScreen;
 import 'views/profile/profile_screen.dart';
@@ -89,7 +88,7 @@ class TrackGameApp extends StatelessWidget {
       ),
       GoRoute(
         path: '/signup',
-        builder: (context, state) => SignupScreen(),
+        builder: (context, state) => const SignupScreen(),
       ),
       // Rutas protegidas (requieren autenticación)
       GoRoute(      

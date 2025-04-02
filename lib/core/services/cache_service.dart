@@ -1,5 +1,4 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'dart:convert';
 
 class CacheService {
   static final CacheService _instance = CacheService._internal();

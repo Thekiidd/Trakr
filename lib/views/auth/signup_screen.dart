@@ -92,7 +92,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 controller: _emailController,
                 decoration: InputDecoration(
                   labelText: 'Correo Electrónico',
-                  prefixIcon: Icon(Icons.email, color: AppTheme.secondaryLight),
+                  prefixIcon: const Icon(Icons.email, color: AppTheme.secondaryLight),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -107,7 +107,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               // Campo de Contraseña
               TextFormField(
@@ -115,7 +115,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
-                  prefixIcon: Icon(Icons.lock, color: AppTheme.secondaryLight),
+                  prefixIcon: const Icon(Icons.lock, color: AppTheme.secondaryLight),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -130,7 +130,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               // Campo de Confirmar Contraseña
               TextFormField(
@@ -138,7 +138,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'Confirmar Contraseña',
-                  prefixIcon: Icon(Icons.lock_outline, color: AppTheme.secondaryLight),
+                  prefixIcon: const Icon(Icons.lock_outline, color: AppTheme.secondaryLight),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -150,20 +150,20 @@ class _SignupScreenState extends State<SignupScreen> {
                   return null;
                 },
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               // Botón de Registro
               ElevatedButton(
                 onPressed: _isLoading ? null : _registrar,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentBlue,
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: _isLoading
-                    ? CircularProgressIndicator(color: AppTheme.secondaryLight)
+                    ? const CircularProgressIndicator(color: AppTheme.secondaryLight)
                     : Text(
                         'Registrarse',
                         style: GoogleFonts.inter(
@@ -174,15 +174,15 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
 
               if (_errorMessage != null) ...[
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 Text(
                   _errorMessage!,
-                  style: TextStyle(color: Colors.red),
+                  style: const TextStyle(color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
               ],
 
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () => context.go('/login'),
                 child: Text(

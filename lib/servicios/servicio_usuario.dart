@@ -234,7 +234,7 @@ class ServicioUsuario {
         
         // Añadimos también a la lista de juegos recientes
         final userDoc = await _db.collection('usuarios').doc(uid).get();
-        final userData = userDoc.data() as Map<String, dynamic>?;
+        final userData = userDoc.data();
         
         if (userData != null) {
           List<String> juegosRecientes = List<String>.from(userData['juegosRecientes'] ?? []);
@@ -506,9 +506,35 @@ class ServicioUsuario {
         // Actualizar el documento con los cambios
         await docRef.update({
           'listas': listas,
+          // Solo incrementar juegosCompletados si el estado es "Completado"
           'juegosCompletados': estado == 'Completado' ? FieldValue.increment(1) : FieldValue.increment(0),
-          'totalHorasJugadas': FieldValue.increment(tiempoJugado ~/ 60),
+          'totalHorasJugadas': FieldValue.increment(tiempoJugado),
         });
+      } else {
+        // El juego ya existe en la lista, actualizamos sus datos
+        final juegoIndex = juegos.indexWhere((juego) => juego['id'] == gameId);
+        if (juegoIndex != -1) {
+          // Guardar estado anterior para verificar si cambió a "Completado"
+          final estadoAnterior = juegos[juegoIndex]['estado'] ?? '';
+          final tiempoAnterior = juegos[juegoIndex]['tiempoJugado'] ?? 0;
+          
+          // Actualizar el juego existente
+          juegos[juegoIndex] = nuevoJuego;
+          listas[listaIndex]['juegos'] = juegos;
+          
+          // Actualizar el documento con los cambios
+          await docRef.update({
+            'listas': listas,
+            // Incrementar juegosCompletados solo si el estado cambió a "Completado"
+            'juegosCompletados': (estado == 'Completado' && estadoAnterior != 'Completado') 
+                ? FieldValue.increment(1) 
+                : (estadoAnterior == 'Completado' && estado != 'Completado')
+                    ? FieldValue.increment(-1)
+                    : FieldValue.increment(0),
+            // Actualizar el tiempo jugado (la diferencia)
+            'totalHorasJugadas': FieldValue.increment(tiempoJugado - tiempoAnterior),
+          });
+        }
       }
     } catch (e) {
       print('Error al agregar juego a la lista: $e');
@@ -543,15 +569,35 @@ class ServicioUsuario {
         throw Exception('Lista no encontrada');
       }
       
-      // Filtrar el juego a eliminar
+      // Buscar el juego antes de eliminarlo para obtener sus datos
       List<dynamic> juegos = List.from(listas[index]['juegos'] ?? []);
-      juegos.removeWhere((juego) => juego['gameId'] == gameId);
+      var juegoIndex = juegos.indexWhere((juego) => juego['id'] == gameId);
+      
+      if (juegoIndex == -1) {
+        // El juego no se encontró
+        return;
+      }
+      
+      // Obtener los datos del juego para actualizar estadísticas
+      var juego = juegos[juegoIndex];
+      int tiempoJugado = juego['tiempoJugado'] ?? 0;
+      String estado = juego['estado'] ?? '';
+      bool eraCompletado = estado == 'Completado';
+      
+      // Eliminar el juego
+      juegos.removeAt(juegoIndex);
       
       // Actualizar la lista de juegos
       listas[index]['juegos'] = juegos;
       
-      // Actualizar el documento
-      await docRef.update({'listas': listas});
+      // Actualizar el documento y ajustar estadísticas
+      await docRef.update({
+        'listas': listas,
+        // Decrementar juegosCompletados si el juego estaba completado
+        'juegosCompletados': eraCompletado ? FieldValue.increment(-1) : FieldValue.increment(0),
+        // Decrementar las horas jugadas
+        'totalHorasJugadas': FieldValue.increment(-tiempoJugado),
+      });
     } catch (e) {
       print('Error al eliminar juego de la lista: $e');
       rethrow;
@@ -632,11 +678,6 @@ class ServicioUsuario {
         
         return fechaB.compareTo(fechaA);
       });
-
-      print("Juegos obtenidos: ${juegos.length}");
-      for (var juego in juegos) {
-        print("Juego: ${juego['nombre']} - Imagen: ${juego['imagen'] ?? 'Sin imagen'}");
-      }
 
       return juegos;
     } catch (e) {

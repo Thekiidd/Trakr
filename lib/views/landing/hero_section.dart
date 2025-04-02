@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/theme/app_theme.dart';
-import '../../viewmodels/auth_viewmodel.dart';
 
 class HeroSection extends StatelessWidget {
   const HeroSection({super.key});
@@ -96,7 +94,7 @@ class HeroSection extends StatelessWidget {
                       onPressed: () => context.go('/games'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.secondaryLight,
-                        side: BorderSide(color: AppTheme.secondaryLight),
+                        side: const BorderSide(color: AppTheme.secondaryLight),
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
@@ -124,7 +122,7 @@ class HeroSection extends StatelessWidget {
                       width: 1,
                     ),
                   ),
-                  child: Row(
+                  child: const Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       _StatItem(
@@ -132,13 +130,13 @@ class HeroSection extends StatelessWidget {
                         label: 'Juegos',
                         icon: Icons.games,
                       ),
-                      const SizedBox(width: 32),
+                      SizedBox(width: 32),
                       _StatItem(
                         number: '50K+',
                         label: 'Usuarios',
                         icon: Icons.people,
                       ),
-                      const SizedBox(width: 32),
+                      SizedBox(width: 32),
                       _StatItem(
                         number: '1M+',
                         label: 'Horas',
@@ -246,7 +244,7 @@ class HeroSection extends StatelessWidget {
                         onPressed: () => context.go('/games'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: AppTheme.secondaryLight,
-                          side: BorderSide(color: AppTheme.secondaryLight),
+                          side: const BorderSide(color: AppTheme.secondaryLight),
                           padding: EdgeInsets.symmetric(
                             vertical: MediaQuery.of(context).size.width < 360 ? 12 : 16,
                           ),
@@ -271,7 +269,7 @@ class HeroSection extends StatelessWidget {
                   builder: (context, constraints) {
                     // Si es muy estrecho, apilamos verticalmente
                     if (constraints.maxWidth < 300) {
-                      return Column(
+                      return const Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           _StatItem(
@@ -279,13 +277,13 @@ class HeroSection extends StatelessWidget {
                             label: 'Juegos',
                             icon: Icons.games,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           _StatItem(
                             number: '50K+',
                             label: 'Usuarios',
                             icon: Icons.people,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           _StatItem(
                             number: '1M+',
                             label: 'Horas',
@@ -296,7 +294,7 @@ class HeroSection extends StatelessWidget {
                     }
                     
                     // Si hay más espacio, usamos Wrap
-                    return Wrap(
+                    return const Wrap(
                       spacing: 20,
                       runSpacing: 20,
                       alignment: WrapAlignment.center,
@@ -370,7 +368,7 @@ class HeroSection extends StatelessWidget {
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return Container(
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       color: AppTheme.primaryDark,
                     ),
                     child: Center(
@@ -416,7 +414,7 @@ class HeroSection extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.gamepad,
                         color: AppTheme.accentBlue,
                         size: 16,

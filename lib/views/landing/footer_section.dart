@@ -39,7 +39,7 @@ class FooterSection extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.gamepad,
                         color: AppTheme.accentBlue,
                         size: 24,
@@ -74,7 +74,7 @@ class FooterSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FooterHeading('Navegación'),
+                  const _FooterHeading('Navegación'),
                   const SizedBox(height: 16),
                   _FooterLink(
                     text: 'Inicio',
@@ -98,7 +98,7 @@ class FooterSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FooterHeading('Cuenta'),
+                  const _FooterHeading('Cuenta'),
                   const SizedBox(height: 16),
                   _FooterLink(
                     text: 'Iniciar Sesión',
@@ -122,7 +122,7 @@ class FooterSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FooterHeading('Legal'),
+                  const _FooterHeading('Legal'),
                   const SizedBox(height: 16),
                   _FooterLink(
                     text: 'Términos de Servicio',
@@ -183,7 +183,7 @@ class FooterSection extends StatelessWidget {
         // Logo y descripción
         Row(
           children: [
-            Icon(
+            const Icon(
               Icons.gamepad,
               color: AppTheme.accentBlue,
               size: 24,
@@ -222,7 +222,7 @@ class FooterSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FooterHeading('Navegación'),
+                  const _FooterHeading('Navegación'),
                   const SizedBox(height: 16),
                   _FooterLink(
                     text: 'Inicio',
@@ -246,7 +246,7 @@ class FooterSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _FooterHeading('Cuenta'),
+                  const _FooterHeading('Cuenta'),
                   const SizedBox(height: 16),
                   _FooterLink(
                     text: 'Iniciar Sesión',

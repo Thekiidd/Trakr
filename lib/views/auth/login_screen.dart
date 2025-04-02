@@ -68,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.secondaryLight),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.secondaryLight),
           onPressed: () => context.go('/'),
         ),
       ),
@@ -81,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
                 // Logo o Imagen
-                Icon(
+                const Icon(
                   Icons.games,
                   size: 80,
                   color: AppTheme.accentBlue,
@@ -115,14 +115,14 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
-                  style: TextStyle(color: AppTheme.secondaryLight),
+                  style: const TextStyle(color: AppTheme.secondaryLight),
                 decoration: InputDecoration(
                   labelText: 'Correo Electrónico',
                     labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
-                    prefixIcon: Icon(Icons.email, color: AppTheme.accentBlue),
+                    prefixIcon: const Icon(Icons.email, color: AppTheme.accentBlue),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.accentBlue),
+                      borderSide: const BorderSide(color: AppTheme.accentBlue),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -130,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.accentBlue),
+                      borderSide: const BorderSide(color: AppTheme.accentBlue),
                     ),
                   ),
                 validator: (value) {
@@ -149,11 +149,11 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: _passwordController,
                   obscureText: _obscurePassword,
-                  style: TextStyle(color: AppTheme.secondaryLight),
+                  style: const TextStyle(color: AppTheme.secondaryLight),
                 decoration: InputDecoration(
                   labelText: 'Contraseña',
                     labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
-                    prefixIcon: Icon(Icons.lock, color: AppTheme.accentBlue),
+                    prefixIcon: const Icon(Icons.lock, color: AppTheme.accentBlue),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword ? Icons.visibility : Icons.visibility_off,
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.accentBlue),
+                      borderSide: const BorderSide(color: AppTheme.accentBlue),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
@@ -175,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: AppTheme.accentBlue),
+                      borderSide: const BorderSide(color: AppTheme.accentBlue),
                     ),
                   ),
                 validator: (value) {
@@ -210,13 +210,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: _isLoading ? null : _login,
                 style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.accentBlue,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                   child: _isLoading
-                      ? SizedBox(
+                      ? const SizedBox(
                           height: 20,
                           width: 20,
                           child: CircularProgressIndicator(
@@ -240,7 +240,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Expanded(child: Divider(color: AppTheme.secondaryLight.withOpacity(0.3))),
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'O continúa con',
                         style: GoogleFonts.inter(
@@ -264,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       icon: 'assets/icons/google.png',
                       label: 'Google',
                     ),
-                    SizedBox(width: 16),
+                    const SizedBox(width: 16),
                     _socialLoginButton(
                 onPressed: () {
                         // TODO: Implementar login con Facebook
@@ -300,10 +300,10 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
 
                 if (_errorMessage != null) ...[
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   Text(
                     _errorMessage!,
-                    style: TextStyle(color: Colors.red),
+                    style: const TextStyle(color: Colors.red),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -324,7 +324,7 @@ class _LoginScreenState extends State<LoginScreen> {
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: AppTheme.cardColor,
-        padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
           side: BorderSide(color: AppTheme.accentBlue.withOpacity(0.5)),

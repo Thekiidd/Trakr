@@ -117,7 +117,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: AppTheme.accentBlue),
+          const CircularProgressIndicator(color: AppTheme.accentBlue),
           const SizedBox(height: 16),
           Text(
             'Cargando tu perfil...',
@@ -136,7 +136,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.error_outline,
             color: Colors.red,
             size: 48,
@@ -226,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       });
       
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Perfil actualizado correctamente'),
           backgroundColor: AppTheme.accentGreen,
         ),
@@ -408,7 +408,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       ),
                   ],
                 ),
-                SizedBox(width: 16),
+                const SizedBox(width: 16),
                 // Información del usuario
                 Expanded(
                   child: Column(
@@ -444,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Row(
                         children: [
                           Icon(
@@ -452,7 +452,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             color: AppTheme.accentBlue,
                             size: isMobile ? 18 : 20,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
                             'Nivel: ${usuario.nivelUsuario ?? "Novato"}',
                             style: GoogleFonts.inter(
@@ -463,7 +463,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           ),
                         ],
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text(
                         'Miembro desde ${_formatDate(usuario.fechaRegistro)}',
                         style: GoogleFonts.inter(
@@ -490,17 +490,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppTheme.accentBlue),
+                    borderSide: const BorderSide(color: AppTheme.accentBlue),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
-                    borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
+                    borderSide: const BorderSide(color: AppTheme.accentBlue, width: 2),
                   ),
                 ),
               )
             else
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: AppTheme.secondaryDark.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(8),
@@ -513,12 +513,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   children: [
                     Row(
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.info_outline,
                           color: AppTheme.accentBlue,
                           size: 18,
                         ),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         Text(
                           'Biografía',
                           style: GoogleFonts.montserrat(
@@ -529,7 +529,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
                       usuario.biografia?.isNotEmpty == true
                           ? usuario.biografia!
@@ -582,7 +582,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           unselectedLabelColor: AppTheme.secondaryLight.withOpacity(0.7),
           indicatorColor: AppTheme.accentBlue,
           indicatorWeight: 3,
-          tabs: [
+          tabs: const [
             Tab(text: 'INFO'),
             Tab(text: 'JUEGOS'),
             Tab(text: 'LOGROS'),
@@ -598,10 +598,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return Container(
       color: AppTheme.primaryDark,
       child: ListView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         children: [
           _construirSeccionEstadisticas(usuario),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _construirSeccionActividad(usuario),
         ],
       ),
@@ -620,7 +620,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           return Center(
             child: Text(
               'Error al cargar los juegos: ${snapshot.error}',
-              style: TextStyle(color: Colors.red),
+              style: const TextStyle(color: Colors.red),
             ),
           );
         }
@@ -658,6 +658,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           );
         }
 
+        // Aquí mostramos todos los juegos, sin filtrar por estado
         return GridView.builder(
           padding: const EdgeInsets.all(12),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -669,7 +670,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           itemCount: juegos.length,
           itemBuilder: (context, index) {
             final juego = juegos[index];
-            return Container(
+            return InkWell(
+              onTap: () => context.push('/game-details/${juego['id']}'),
+              child: Container(
               decoration: BoxDecoration(
                 color: AppTheme.secondaryDark,
                 borderRadius: BorderRadius.circular(8),
@@ -743,7 +746,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(
+                              const Icon(
                                 Icons.star,
                                 size: 10,
                                 color: Colors.amber,
@@ -757,7 +760,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              Icon(
+                              const Icon(
                                 Icons.timer,
                                 size: 10,
                                 color: AppTheme.accentBlue,
@@ -795,6 +798,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     ),
                   ),
                 ],
+                ),
               ),
             );
           },
@@ -845,8 +849,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             right: 16,
             child: FloatingActionButton(
               backgroundColor: AppTheme.accentBlue,
-              child: const Icon(Icons.add, color: Colors.white),
               onPressed: _mostrarDialogoNuevaLista,
+              child: const Icon(Icons.add, color: Colors.white),
             ),
           ),
         ],
@@ -859,7 +863,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         Container(
           color: AppTheme.primaryDark,
           child: ListView.builder(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             itemCount: usuario.listas.length,
             itemBuilder: (context, index) {
               final lista = usuario.listas[index];
@@ -873,7 +877,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   ),
                 ),
                 elevation: 0,
-                margin: EdgeInsets.only(bottom: 16),
+                margin: const EdgeInsets.only(bottom: 16),
                 child: ExpansionTile(
                   title: Row(
                     children: [
@@ -882,7 +886,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         color: lista.esPrivada ? Colors.red : Colors.green,
                         size: 18,
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       Text(
                         lista.nombre,
                         style: GoogleFonts.montserrat(
@@ -904,7 +908,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.edit,
                           color: AppTheme.accentBlue,
                           size: 20,
@@ -912,7 +916,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         onPressed: () => _editarLista(lista),
                       ),
                       IconButton(
-                        icon: Icon(
+                        icon: const Icon(
                           Icons.delete_outline,
                           color: Colors.red,
                           size: 20,
@@ -939,7 +943,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                     fontSize: 14,
                                   ),
                                 ),
-                                SizedBox(height: 4),
+                                const SizedBox(height: 4),
                                 Text(
                                   lista.descripcion,
                                   style: GoogleFonts.inter(
@@ -947,7 +951,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                     fontSize: 14,
                                   ),
                                 ),
-                                SizedBox(height: 16),
+                                const SizedBox(height: 16),
                               ],
                             ),
                           lista.juegos.isEmpty
@@ -964,16 +968,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                   ),
                                 )
                               : _construirListaJuegos(lista.juegos, isMobile),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Center(
                             child: ElevatedButton.icon(
                               onPressed: () => _showAddGameDialog(lista.id, lista.nombre),
-                              icon: Icon(Icons.add_circle_outline, size: 18),
-                              label: Text('Añadir Juego'),
+                              icon: const Icon(Icons.add_circle_outline, size: 18),
+                              label: const Text('Añadir Juego'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppTheme.accentBlue,
                                 foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               ),
                             ),
                           ),
@@ -991,8 +995,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           right: 16,
           child: FloatingActionButton(
             backgroundColor: AppTheme.accentBlue,
-            child: const Icon(Icons.add, color: Colors.white),
             onPressed: _mostrarDialogoNuevaLista,
+            child: const Icon(Icons.add, color: Colors.white),
           ),
         ),
       ],
@@ -1000,7 +1004,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Widget _construirListaJuegos(List<GameInList> juegos, bool isMobile) {
-    return Container(
+    return SizedBox(
       height: 140,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -1009,7 +1013,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           final juego = juegos[index];
           return Container(
             width: 180,
-            margin: EdgeInsets.only(right: 12),
+            margin: const EdgeInsets.only(right: 12),
             child: Card(
               color: AppTheme.secondaryDark.withOpacity(0.4),
               shape: RoundedRectangleBorder(
@@ -1023,11 +1027,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   children: [
                     // Imagen del juego
                     ClipRRect(
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                         topLeft: Radius.circular(8),
                         topRight: Radius.circular(8),
                       ),
-                      child: Container(
+                      child: SizedBox(
                         height: 85,
                         width: double.infinity,
                         child: juego.imagenUrl != null && juego.imagenUrl!.isNotEmpty
@@ -1069,7 +1073,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 2),
+                          const SizedBox(height: 2),
                           Text(
                             'Añadido el ${_formatDate(juego.fechaAgregado)}',
                             style: GoogleFonts.inter(
@@ -1118,38 +1122,38 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   children: [
                     TextField(
                       controller: nombreController,
-                      style: TextStyle(color: AppTheme.secondaryLight),
+                      style: const TextStyle(color: AppTheme.secondaryLight),
                       decoration: InputDecoration(
                         labelText: 'Nombre de la lista',
                         labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
+                        border: const OutlineInputBorder(),
+                        focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: descripcionController,
-                      style: TextStyle(color: AppTheme.secondaryLight),
+                      style: const TextStyle(color: AppTheme.secondaryLight),
                       maxLines: 3,
                       decoration: InputDecoration(
                         labelText: 'Descripción',
                         labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
+                        border: const OutlineInputBorder(),
+                        focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
-                        Text(
+                        const Text(
                           'Lista Privada',
                           style: TextStyle(color: AppTheme.secondaryLight),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Switch(
                           value: esPrivada,
                           onChanged: (value) {
@@ -1176,7 +1180,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   onPressed: () async {
                     if (nombreController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('El nombre de la lista no puede estar vacío'),
                           backgroundColor: Colors.red,
                         ),
@@ -1195,7 +1199,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
                     if (resultado) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('Lista creada con éxito'),
                           backgroundColor: Colors.green,
                         ),
@@ -1213,7 +1217,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     backgroundColor: AppTheme.accentBlue,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text('Crear'),
+                  child: const Text('Crear'),
                 ),
               ],
             );
@@ -1251,38 +1255,38 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   children: [
                     TextField(
                       controller: nombreController,
-                      style: TextStyle(color: AppTheme.secondaryLight),
+                      style: const TextStyle(color: AppTheme.secondaryLight),
                       decoration: InputDecoration(
                         labelText: 'Nombre de la lista',
                         labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
+                        border: const OutlineInputBorder(),
+                        focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     TextField(
                       controller: descripcionController,
-                      style: TextStyle(color: AppTheme.secondaryLight),
+                      style: const TextStyle(color: AppTheme.secondaryLight),
                       maxLines: 3,
                       decoration: InputDecoration(
                         labelText: 'Descripción',
                         labelStyle: TextStyle(color: AppTheme.secondaryLight.withOpacity(0.7)),
-                        border: OutlineInputBorder(),
-                        focusedBorder: OutlineInputBorder(
+                        border: const OutlineInputBorder(),
+                        focusedBorder: const OutlineInputBorder(
                           borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
                         ),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
-                        Text(
+                        const Text(
                           'Lista Privada',
                           style: TextStyle(color: AppTheme.secondaryLight),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         Switch(
                           value: esPrivada,
                           onChanged: (value) {
@@ -1309,7 +1313,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   onPressed: () async {
                     if (nombreController.text.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('El nombre de la lista no puede estar vacío'),
                           backgroundColor: Colors.red,
                         ),
@@ -1329,7 +1333,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
                     if (resultado) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('Lista actualizada con éxito'),
                           backgroundColor: Colors.green,
                         ),
@@ -1347,7 +1351,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     backgroundColor: AppTheme.accentBlue,
                     foregroundColor: Colors.white,
                   ),
-                  child: Text('Guardar'),
+                  child: const Text('Guardar'),
                 ),
               ],
             );
@@ -1392,7 +1396,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
               if (resultado) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
+                  const SnackBar(
                     content: Text('Lista eliminada con éxito'),
                     backgroundColor: Colors.green,
                   ),
@@ -1410,7 +1414,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: Text('Eliminar'),
+            child: const Text('Eliminar'),
           ),
         ],
       ),
@@ -1418,9 +1422,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
   
   void _showAddGameDialog(String listId, String listName) {
-    final TextEditingController _searchController = TextEditingController();
-    bool _buscando = false;
-    List<dynamic> _juegosEncontrados = [];
+    final TextEditingController searchController = TextEditingController();
+    bool buscando = false;
+    List<dynamic> juegosEncontrados = [];
     
     showDialog(
       context: context,
@@ -1438,32 +1442,32 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               ),
               content: Container(
                 width: double.maxFinite,
-                constraints: BoxConstraints(maxHeight: 400),
+                constraints: const BoxConstraints(maxHeight: 400),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Campo de búsqueda
                     TextField(
-                      controller: _searchController,
+                      controller: searchController,
                       style: GoogleFonts.inter(color: AppTheme.secondaryLight),
                       decoration: InputDecoration(
                         hintText: 'Buscar juego...',
                         hintStyle: GoogleFonts.inter(color: AppTheme.secondaryLight.withOpacity(0.5)),
-                        prefixIcon: Icon(Icons.search, color: AppTheme.secondaryLight),
+                        prefixIcon: const Icon(Icons.search, color: AppTheme.secondaryLight),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: AppTheme.accentBlue),
+                          borderSide: const BorderSide(color: AppTheme.accentBlue),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: AppTheme.accentBlue, width: 2),
+                          borderSide: const BorderSide(color: AppTheme.accentBlue, width: 2),
                         ),
                       ),
                       onSubmitted: (value) async {
                         if (value.isEmpty) return;
                         
                         setState(() {
-                          _buscando = true;
+                          buscando = true;
                         });
                         
                         try {
@@ -1472,16 +1476,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           final games = await apiService.fetchGames(searchQuery: value);
                           
                           setState(() {
-                            _juegosEncontrados = games.map((game) => {
+                            juegosEncontrados = games.map((game) => {
                               'id': game.id,
                               'nombre': game.title,
                               'imagen': game.coverImage,
                             }).toList();
-                            _buscando = false;
+                            buscando = false;
                           });
                         } catch (e) {
                           setState(() {
-                            _buscando = false;
+                            buscando = false;
                             // Mensaje de error
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
@@ -1494,13 +1498,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       },
                     ),
                     
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     
                     // Resultados o indicador de carga
                     Expanded(
-                      child: _buscando
-                        ? Center(child: CircularProgressIndicator(color: AppTheme.accentBlue))
-                        : _juegosEncontrados.isEmpty
+                      child: buscando
+                        ? const Center(child: CircularProgressIndicator(color: AppTheme.accentBlue))
+                        : juegosEncontrados.isEmpty
                           ? Center(
                               child: Text(
                                 'Busca un juego para añadirlo a tu lista',
@@ -1511,9 +1515,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                               ),
                             )
                           : ListView.builder(
-                              itemCount: _juegosEncontrados.length,
+                              itemCount: juegosEncontrados.length,
                               itemBuilder: (context, index) {
-                                final juego = _juegosEncontrados[index];
+                                final juego = juegosEncontrados[index];
                                 return ListTile(
                                   leading: juego['imagen'] != null && juego['imagen'].isNotEmpty
                                     ? ClipRRect(
@@ -1528,7 +1532,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                               width: 50,
                                               height: 50,
                                               color: AppTheme.accentBlue.withOpacity(0.2),
-                                              child: Icon(Icons.videogame_asset, color: AppTheme.accentBlue),
+                                              child: const Icon(Icons.videogame_asset, color: AppTheme.accentBlue),
                                             ),
                                         ),
                                       )
@@ -1536,7 +1540,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                         width: 50,
                                         height: 50,
                                         color: AppTheme.accentBlue.withOpacity(0.2),
-                                        child: Icon(Icons.videogame_asset, color: AppTheme.accentBlue),
+                                        child: const Icon(Icons.videogame_asset, color: AppTheme.accentBlue),
                                       ),
                                   title: Text(
                                     juego['nombre'],
@@ -1551,7 +1555,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                     
                                     // Mostrar indicador de carga
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                         content: Text('Añadiendo juego a la lista...'),
                                         duration: Duration(seconds: 1),
                                       ),
@@ -1562,7 +1566,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                                       await _agregarJuegoALista(listId, juego['id'], juego['nombre'], juego['imagen']);
                                       
                                       ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
+                                        const SnackBar(
                                           content: Text('¡Juego añadido a la lista!'),
                                           backgroundColor: AppTheme.accentGreen,
                                         ),
@@ -1648,18 +1652,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
       elevation: 0,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.bar_chart,
                   color: AppTheme.accentBlue,
                   size: 24,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Estadísticas',
                   style: GoogleFonts.montserrat(
@@ -1670,10 +1674,49 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
+            FutureBuilder<List<Map<String, dynamic>>>(
+              future: _servicioUsuario.obtenerTodosLosJuegos(usuario.uid),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error al cargar estadísticas: ${snapshot.error}',
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
+
+                final juegos = snapshot.data ?? [];
+                
+                // Calcular estadísticas basadas en los juegos
+                int horasTotales = 0;
+                int juegosCompletados = 0;
+                
+                for (var juego in juegos) {
+                  // Sumar horas totales
+                  horasTotales += (juego['tiempoJugado'] ?? 0) as int;
+                  
+                  // Contar juegos completados
+                  if ((juego['estado'] ?? '') == 'Completado') {
+                    juegosCompletados++;
+                  }
+                }
+                
+                return Column(
+                  children: [
             _construirEstadisticaItem(
               'Horas Jugadas',
-              '${usuario.totalHorasJugadas}h',
+                      '${horasTotales}h',
               Icons.timer,
             ),
             _construirEstadisticaItem(
@@ -1683,8 +1726,17 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             ),
             _construirEstadisticaItem(
               'Juegos Completados',
-              '${usuario.juegosCompletados}',
+                      '$juegosCompletados',
               Icons.games,
+            ),
+                    _construirEstadisticaItem(
+                      'Total de Juegos',
+                      '${juegos.length}',
+                      Icons.gamepad,
+                    ),
+          ],
+                );
+              },
             ),
           ],
         ),
@@ -1704,18 +1756,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
       elevation: 0,
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.history,
                   color: AppTheme.accentBlue,
                   size: 24,
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Text(
                   'Actividad Reciente',
                   style: GoogleFonts.montserrat(
@@ -1726,7 +1778,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             // Actividad simulada - En una implementación real se cargaría de la base de datos
             _construirItemActividad(
               'Te has unido a TRAKR',
@@ -1752,7 +1804,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppTheme.accentBlue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -1763,7 +1815,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               size: 20,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1776,7 +1828,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   fecha,
                   style: GoogleFonts.inter(
@@ -1817,7 +1869,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             ),
           ),
         ),
-        SizedBox(height: 8),
+        const SizedBox(height: 8),
         Text(
           titulo,
           style: GoogleFonts.inter(
@@ -1831,11 +1883,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   Widget _construirEstadisticaItem(String titulo, String valor, IconData icono) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(8),
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: AppTheme.accentBlue.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
@@ -1846,7 +1898,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               size: 20,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Text(
             titulo,
             style: GoogleFonts.inter(
@@ -1854,7 +1906,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               fontSize: 16,
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Text(
             valor,
             style: GoogleFonts.inter(
@@ -1885,13 +1937,13 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           children: [
             // Imagen del juego (simulada)
             ClipRRect(
-              borderRadius: BorderRadius.only(
+              borderRadius: const BorderRadius.only(
                 topLeft: Radius.circular(12),
                 topRight: Radius.circular(12),
               ),
               child: Container(
                 height: 120,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppTheme.secondaryDark,
                   image: DecorationImage(
                     image: NetworkImage('https://firebasestorage.googleapis.com/v0/b/flutter-web-app-80ca6.appspot.com/o/placeholder-game.jpg?alt=media'),
@@ -1915,15 +1967,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4),
+                  const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
+                      const Icon(
                         Icons.star,
                         color: Colors.amber,
                         size: 16,
                       ),
-                      SizedBox(width: 4),
+                      const SizedBox(width: 4),
                       Text(
                         '4.5',
                         style: GoogleFonts.inter(
@@ -1953,7 +2005,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: Icon(Icons.photo_library, color: AppTheme.secondaryLight),
+              leading: const Icon(Icons.photo_library, color: AppTheme.secondaryLight),
               title: Text('Seleccionar de la galería', 
                 style: GoogleFonts.inter(color: AppTheme.secondaryLight)),
               onTap: () async {
@@ -1979,7 +2031,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               },
             ),
             ListTile(
-              leading: Icon(Icons.camera_alt, color: AppTheme.secondaryLight),
+              leading: const Icon(Icons.camera_alt, color: AppTheme.secondaryLight),
               title: Text('Tomar una foto', 
                 style: GoogleFonts.inter(color: AppTheme.secondaryLight)),
               onTap: () async {
@@ -2031,12 +2083,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.info_outline,
               size: 48,
               color: AppTheme.accentBlue,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Para implementar la selección de archivos en Flutter Web, debes usar:'
               '\n\nhtml.FileUploadInputElement()\n\nY luego procesar los bytes con Firebase Storage.',
@@ -2087,7 +2139,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         _userViewModel.updateUser(updatedUser);
         
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content: Text('Imagen de perfil actualizada'),
             backgroundColor: AppTheme.accentGreen,
           ),
@@ -2126,12 +2178,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            const Icon(
               Icons.construction,
               size: 48,
               color: AppTheme.accentBlue,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               'Esta funcionalidad se implementará próximamente.',
               style: GoogleFonts.inter(
@@ -2222,7 +2274,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               size: 64,
               color: AppTheme.accentBlue.withOpacity(0.5),
             ),
-            SizedBox(height: 24),
+            const SizedBox(height: 24),
             Text(
               title,
               style: GoogleFonts.montserrat(
@@ -2232,7 +2284,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Text(
               subtitle,
               style: GoogleFonts.inter(
